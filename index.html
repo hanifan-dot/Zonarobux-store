@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zona Robux - App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="animasi-petasan" class="overlay-petasan">
+    <div class="teks-hore">🎉 Horeee!<br>Akun Anda Telah Dibuat 🎆</div>
+</div>
+
+<div id="modal-auth" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+        <h2 id="modal-title" style="color:#2ecc71; margin-top:0;">Buat Akun Resmi</h2>
+        <input type="text" id="reg-user" placeholder="Username (Min 5 huruf)" oninput="cekUsername(this.value)">
+        <p id="error-user" style="color:#ff3b30; font-size: 11px; margin: 5px 0;"></p>
+        <input type="password" id="reg-pass" placeholder="Password">
+        <button class="btn-beli" style="margin-top:10px;" onclick="prosesAuth()">Lanjut</button>
+        <p onclick="switchAuth()" id="switch-text" style="cursor:pointer; font-size:12px; margin-top:15px; text-align:center;">Sudah punya akun? Login di sini</p>
+        <p onclick="tutupModalAuth()" style="cursor:pointer; color:#ff3b30; font-size:12px; margin-top:10px; text-align:center;">Batal</p>
+    </div>
+</div>
+
+<!-- MODAL PANEL ADMIN (Cuma buat Hanifanbos01) -->
+<div id="modal-admin" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="border-color: #f1c40f;">
+        <h2 style="color:#f1c40f; margin-top:0;">⚙️ Mesin Verifikasi</h2>
+        <p style="font-size: 12px;">Paste Kode Klaim Poin dari pelanggan ke sini buat ngecek asli atau palsu!</p>
+        <input type="text" id="input-kode-admin" placeholder="Paste Kode (Contoh: YXNkc...)">
+        <button class="btn-beli" style="background:#f1c40f; color:#000;" onclick="verifikasiKode()">Cek Kode</button>
+        <p onclick="document.getElementById('modal-admin').style.display='none'" style="cursor:pointer; color:#ff3b30; font-size:12px; margin-top:15px; text-align:center;">Tutup Panel</p>
+    </div>
+</div>
+
+<div class="app-container">
+    <div class="header">
+        <div class="menu-btn" onclick="toggleSidebar()">☰</div>
+        <h1>ZONA ROBUX</h1>
+        <div class="status-badge">🟢 Admin Hanifan Online</div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div id="sidebar" class="sidebar">
+        <div class="close-btn" onclick="toggleSidebar()">✖</div>
+        <h2>Menu Tambahan</h2>
+        <button class="btn-sidebar btn-wa" onclick="window.open('https://wa.me/62895613282875', '_blank')">💬 Chat Admin Asli</button>
+        <button class="btn-sidebar btn-tema" onclick="toggleTema()">🌓 Ganti Mode (Gelap/Terang)</button>
+        
+        <div style="margin-top: 20px; background: var(--input-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: bold;">Punya Kode Promo?</p>
+            <input type="text" id="input-promo" placeholder="Ketik di sini" style="margin-bottom: 10px;">
+            <button class="btn-cek" style="width: 100%;" onclick="klaimPromo()">Klaim Diskon 15%</button>
+        </div>
+    </div>
+
+    <!-- TAB BERANDA -->
+    <div id="tab-beranda" class="tab-content active">
+        <div class="section-card">
+            <div class="section-title">Pesanan Terbaru 🚀 <span style="font-size:10px; color:#2ecc71;">🔴 Live</span></div>
+            <div id="testi-container" class="scroll-box"></div>
+        </div>
+        <div class="section-card">
+            <div class="section-title">👑 Top 5 Sultan</div>
+            <div id="leaderboard-container"></div>
+        </div>
+    </div>
+
+    <!-- TAB TOP UP -->
+    <div id="tab-topup" class="tab-content" style="display: none;">
+        <div class="section-card">
+            <div class="section-title">Detail User</div>
+            <div class="input-group">
+                <input type="text" id="username" placeholder="Masukkan Username Roblox">
+                <button class="btn-cek" onclick="cekProfile()">Cek</button>
+            </div>
+            <div id="profile-box" style="display: none; align-items: center; background: var(--input-bg); padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid var(--border-color);">
+                <img id="avatar-img" src="" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #2ecc71;">
+                <div style="margin-left: 10px; font-weight: bold;"><span id="display-name">Name</span> <span style="color:#2ecc71;">✔️</span></div>
+            </div>
+        </div>
+
+        <div class="section-card" id="box-tukar-poin" style="display: none; border-color: #f1c40f;">
+            <div class="section-title" style="color: #f1c40f;">🪙 Tukar Poin ke Robux</div>
+            <p style="font-size: 12px; margin-top: 0;">150 Poin = 10 Robux Gratis</p>
+            <div class="input-group">
+                <input type="number" id="input-tukar-poin" placeholder="Ketik poin (Kelipatan 150)">
+                <button class="btn-cek" style="color: #f1c40f; border: 1px solid #f1c40f;" onclick="tukarPoin()">Tukar</button>
+            </div>
+            <p id="notif-poin" style="font-size: 11px; margin: 5px 0 0 0; color: #ff3b30;"></p>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">Pilihan Robux <span class="badge-ready">✔ STOK READY</span></div>
+            <input type="number" id="nominal" placeholder="Ketik manual" oninput="hitungPajak(this.value)">
+            <div class="grid-paket">
+                <div class="paket-card" onclick="pilihPaket(100, this)"><div class="tag-diskon">14% OFF</div><div class="paket-robux">💎 100</div><div class="paket-harga-asli">Rp 15.000</div></div>
+                <div class="paket-card" onclick="pilihPaket(500, this)"><div class="tag-diskon">HOT</div><div class="paket-robux">💎 500</div><div class="paket-harga-asli">Rp 75.000</div></div>
+            </div>
+            <div id="infoPajak" class="info-box">
+                💰 Total Bayar: <b id="hargaRupiah" style="color:#2ecc71;">Rp 0</b> <span id="label-diskon" style="color:#f1c40f; font-size:11px;"></span><br>
+                💡 Set harga GP: <b id="hargaGamepass" style="color:#2ecc71;">0</b> Robux.<br>
+                <div id="box-pakai-voucher" style="display:none; margin-top: 10px;">
+                    <button class="btn-cek" onclick="pakaiVoucher()">Pakai 1 Voucher (Diskon 10%)</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <div class="section-title">Konfirmasi Pesanan</div>
+            <input type="text" id="link" placeholder="Tempel Link Gamepass di sini">
+            <button class="btn-beli" onclick="pesanWa()">Pesan via WhatsApp</button>
+        </div>
+    </div>
+
+    <!-- TAB TRANSAKSI -->
+    <div id="tab-transaksi" class="tab-content" style="display: none;">
+        <div class="section-card">
+            <div class="section-title">Klaim Resi (Dapat Poin!)</div>
+            <p style="font-size: 12px; margin-top: 0;">Masukkan ID Pesanan dari WhatsApp buat nambah 10 Poin.</p>
+            <div class="input-group">
+                <input type="text" id="input-resi" placeholder="Contoh: ZR-ABCD12">
+                <button class="btn-cek" onclick="klaimResi()">Klaim</button>
+            </div>
+        </div>
+        <div class="section-card" style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 50px; margin-bottom: 10px;">📦</div>
+            <h3 style="margin-bottom: 5px;">Riwayat Transaksi</h3>
+            <p style="font-size: 13px;">Semua pesananmu sedang kami rekap.</p>
+        </div>
+    </div>
+
+    <!-- TAB PROFIL -->
+    <div id="tab-profil" class="tab-content" style="display: none;">
+        <div id="view-belum-login" class="section-card" style="text-align: center; padding: 40px 20px;">
+            <div style="font-size: 50px; margin-bottom: 10px;">👤</div>
+            <h3 style="margin-bottom: 5px;">Kamu Belum Login</h3>
+            <p style="font-size: 13px;">Login dulu yuk buat nikmatin fitur Pangkat, Poin, & Voucher!</p>
+            <button class="btn-beli" style="margin-top: 20px;" onclick="bukaModalAuth()">Daftar / Login Akun</button>
+        </div>
+
+        <div id="view-sudah-login" class="section-card" style="display: none; text-align: center; padding: 30px 20px;">
+            <div style="display: flex; justify-content: center; margin-bottom: 15px;">
+                <div id="ava-profil-utama" class="ava-warga" style="width: 80px; height: 80px; background: #2ecc71; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px;">🙂</div>
+            </div>
+            <h2 id="nama-profil" style="margin: 0; color: #2ecc71;">NamaUser</h2>
+            <div id="pangkat-badge" style="display:inline-block; margin-top:5px; padding:3px 10px; border-radius:15px; font-size:12px; font-weight:bold; background:#8B4513; color:#fff;">Warga</div>
+            
+            <div style="display: flex; justify-content: space-between; background: var(--bg-main); padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px solid var(--border-color);">
+                <div><div style="font-size: 12px;">Poin</div><div style="font-weight: bold; color: #f1c40f;" id="text-poin">🪙 0</div></div>
+                <div><div style="font-size: 12px;">Top Up</div><div style="font-weight: bold;" id="text-topup">🛒 0x</div></div>
+                <div><div style="font-size: 12px;">Voucher</div><div style="font-weight: bold; color: #e74c3c;" id="text-voucher">🎫 0</div></div>
+            </div>
+
+            <div id="box-timer" style="display:none; margin-top: 15px; background: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; padding: 10px; border-radius: 8px;">
+                <span style="font-size: 12px; color: #e74c3c; font-weight: bold;">⚠️ VOUCHER HANGUS DALAM: <span id="timer-waktu">23:59:59</span></span>
+            </div>
+            
+            <!-- TOMBOL RAHASIA ADMIN -->
+            <button id="btn-panel-admin" class="btn-beli" style="display:none; background:#f1c40f; color:#000; margin-top: 20px;" onclick="document.getElementById('modal-admin').style.display='flex'">⚙️ BUKA PANEL ADMIN</button>
+            
+            <button class="btn-beli" style="background: #ff3b30; color: #fff; margin-top: 10px;" onclick="logout()">Logout Keluar</button>
+        </div>
+    </div>
+</div>
+
+<nav class="bottom-nav">
+    <div class="nav-item active" id="nav-beranda" onclick="switchTab('beranda')"><div class="nav-icon">🏠</div><span>Beranda</span></div>
+    <div class="nav-item" id="nav-topup" onclick="switchTab('topup')"><div class="nav-icon">💎</div><span>Top Up</span></div>
+    <div class="nav-item" id="nav-transaksi" onclick="switchTab('transaksi')"><div class="nav-icon">🧾</div><span>Transaksi</span></div>
+    <div class="nav-item" id="nav-profil" onclick="switchTab('profil')"><div class="nav-icon">👤</div><span>Profil</span></div>
+</nav>
+
+<script src="script.js"></script>
+</body>
+</html>
+<!--  -->
