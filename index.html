@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zona Store - Roblox & MLBB</title>
+    <title>ZONA TOPUP - Roblox & MLBB</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -42,7 +42,7 @@
     </div>
 </div>
 
-<!-- SIDEBAR (GARIS 3 COMEBACK!) -->
+<!-- SIDEBAR -->
 <div id="sidebar" class="sidebar">
     <div class="close-btn" onclick="toggleSidebar()">✖</div>
     <h2>Menu Tambahan</h2>
@@ -68,7 +68,7 @@
 <div class="app-container">
     <div class="header">
         <div class="menu-btn" onclick="toggleSidebar()">☰</div>
-        <h1 id="header-title">ZONA ROBUX</h1>
+        <h1 id="header-title">ZONA TOPUP</h1>
         <div class="status-badge">🟢 Admin Hanifan Online</div>
         
         <div class="game-switcher">
@@ -90,18 +90,46 @@
 
     <div id="tab-topup" class="tab-content" style="display: none;">
         
+        <!-- FORM ROBLOX -->
         <div id="topup-roblox">
             <div class="section-card">
                 <div class="section-title">Detail User Roblox</div>
-                <input type="text" id="username-rbx" placeholder="Masukkan Username Roblox">
+                <div class="input-group">
+                    <input type="text" id="username-rbx" placeholder="Masukkan Username Roblox">
+                    <button class="btn-cek" onclick="cekProfilRbx()">Cek PP</button>
+                </div>
+                <!-- Tempat Nampilin Foto Profil -->
+                <div id="profil-preview" style="display:none; text-align:center; margin-top:10px; background:var(--input-bg); padding:10px; border-radius:8px; border:1px dashed var(--primary);">
+                    <img id="img-pp-rbx" src="" style="width:60px; height:60px; border-radius:50%; border:2px solid var(--primary); background:#fff;">
+                    <p id="nama-pp-rbx" style="font-size:12px; margin-top:5px; margin-bottom:0; font-weight:bold;"></p>
+                </div>
             </div>
+
             <div class="section-card">
                 <div class="section-title">Pilihan Robux <span class="badge-ready">✔ READY</span></div>
                 <div class="grid-paket">
-                    <div class="paket-card" onclick="pilihPaket('rbx', 100, 19000, this)"><div class="paket-nama">💎 100 Robux</div><div class="paket-harga-asli">Rp 19.000</div></div>
-                    <div class="paket-card" onclick="pilihPaket('rbx', 500, 85000, this)"><div class="tag-diskon">HOT</div><div class="paket-nama">💎 500 Robux</div><div class="paket-harga-asli">Rp 85.000</div></div>
+                    <div class="paket-card" onclick="pilihPaket('rbx', '100 Robux', 15000, this)">
+                        <div class="tag-diskon">PROMO</div>
+                        <div class="paket-nama">💎 100 Robux</div>
+                        <div class="paket-harga-asli"><s style="color:#ff3b30; font-size:11px;">Rp 19.000</s><br>Rp 15.000</div>
+                    </div>
+                    <div class="paket-card" onclick="pilihPaket('rbx', '500 Robux', 75000, this)">
+                        <div class="tag-diskon">HOT</div>
+                        <div class="paket-nama">💎 500 Robux</div>
+                        <div class="paket-harga-asli">Rp 75.000</div>
+                    </div>
+                </div>
+                
+                <!-- INPUT ROBUX MANUAL -->
+                <div style="margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 15px;">
+                    <p style="font-size: 12px; margin-top: 0; margin-bottom: 5px; color: #aaa;">Atau ketik jumlah Robux manual (Rp 150/Robux):</p>
+                    <div class="input-group">
+                        <input type="number" id="input-robux-manual" placeholder="Contoh: 150">
+                        <button class="btn-cek" onclick="hitungManual()">Hitung</button>
+                    </div>
                 </div>
             </div>
+
             <div class="section-card">
                 <div class="section-title">Konfirmasi & Link</div>
                 <input type="text" id="link-rbx" placeholder="Tempel Link Gamepass di sini">
@@ -109,9 +137,10 @@
             </div>
         </div>
 
+        <!-- FORM MLBB -->
         <div id="topup-mlbb" style="display: none;">
             <div class="info-box" style="display: block; border-color: #00cec9; background: rgba(0, 206, 201, 0.1); margin-bottom: 15px;">
-                💡 INFO: Harga 1x WDP asli di dalam aplikasi MLBB adalah <b style="text-decoration: line-through; color: #ff3b30;">Rp 36.053</b>. Top up di Zona Store dijamin lebih murah Bos!
+                💡 INFO: Harga 1x WDP asli di dalam aplikasi MLBB adalah <b style="text-decoration: line-through; color: #ff3b30;">Rp 36.053</b>. Top up di sini dijamin lebih murah Bos!
             </div>
             <div class="section-card">
                 <div class="section-title">Detail Akun MLBB</div>
@@ -144,7 +173,7 @@
         </div>
     </div>
 
-    <!-- TAB TRANSAKSI (SISA PENUKARAN POIN) -->
+    <!-- TAB TRANSAKSI -->
     <div id="tab-transaksi" class="tab-content" style="display: none;">
         <div class="section-card" id="box-tukar-poin" style="display: none; border-color: #f1c40f;">
             <div class="section-title" style="color: #f1c40f;">🪙 Tukar Poin Reward</div>
@@ -161,6 +190,7 @@
         </div>
     </div>
 
+    <!-- TAB PROFIL -->
     <div id="tab-profil" class="tab-content" style="display: none;">
         <div id="view-belum-login" class="section-card" style="text-align: center; padding: 40px 20px;">
             <div style="font-size: 50px; margin-bottom: 10px;">👤</div>

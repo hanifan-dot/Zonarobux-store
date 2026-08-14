@@ -55,6 +55,35 @@ function switchTab(tabName) {
     if (tabName === 'transaksi' && currentUser) document.getElementById('box-tukar-poin').style.display = 'block';
 }
 
+// --- FITUR CEK PP ROBLOX & MANUAL ROBUX ---
+function cekProfilRbx() {
+    let user = document.getElementById("username-rbx").value;
+    if(!user) return alert("Ketik Username Roblox lu dulu Bos!");
+    
+    // Pakai API pembuat avatar unik biar kelihatan keren
+    document.getElementById("img-pp-rbx").src = "https://robohash.org/" + user + "?set=set3"; 
+    document.getElementById("nama-pp-rbx").innerText = "✅ " + user + " (Ditemukan)";
+    document.getElementById("profil-preview").style.display = "block";
+}
+
+function hitungManual() {
+    let jumlah = parseInt(document.getElementById("input-robux-manual").value);
+    if(!jumlah || jumlah < 10) return alert("Minimal order 10 Robux Bos!");
+    
+    // Rate 150 Perak per Robux
+    let harga = jumlah * 150; 
+    
+    document.querySelectorAll('.paket-card').forEach(c => c.classList.remove('active'));
+    
+    selectedItem.nama = jumlah + " Robux (Manual)";
+    selectedItem.harga = harga;
+    
+    let hargaDiskon = harga - (harga * (activeDiscount / 100));
+    document.getElementById("hargaRupiah").innerText = "Rp " + hargaDiskon.toLocaleString("id-ID");
+    document.getElementById("detail-item-pilihan").innerText = `Item: ${selectedItem.nama} | ROBLOX`;
+    document.getElementById("infoPajak").style.display = "block";
+}
+
 // --- AKUN ---
 let isLoginMode = false;
 function bukaModalAuth() { document.getElementById("modal-auth").style.display = "flex"; }
@@ -142,6 +171,9 @@ function pilihPaket(tipeGame, namaItem, hargaAsli, elemen) {
     document.querySelectorAll('.paket-card').forEach(c => c.classList.remove('active'));
     elemen.classList.add('active'); 
     
+    // Reset manual input kalau milih paket kotak
+    if(tipeGame === 'rbx') document.getElementById("input-robux-manual").value = "";
+    
     selectedItem.nama = namaItem;
     selectedItem.harga = hargaAsli;
     
@@ -183,7 +215,7 @@ function pesanWa(game) {
     if(game === 'roblox') {
         let userRbx = document.getElementById("username-rbx").value;
         let linkRbx = document.getElementById("link-rbx").value;
-        if(!userRbx || !linkRbx) return alert("Lengkapi data Roblox!");
+        if(!userRbx || !linkRbx) return alert("Lengkapi data Roblox (Username & Link)!");
         userDetail = `👤 Username: ${userRbx}%0A🔗 Link: ${linkRbx}`;
     } else {
         let idMl = document.getElementById("userid-mlbb").value;
@@ -208,7 +240,7 @@ function pesanWa(game) {
 
 // --- SISTEM ADMIN BIKIN KODE POIN ---
 function generateKodePoin() {
-    let resiBaru = "ZN-" + Math.floor(1000 + Math.random() * 9000); // Ex: ZN-4829
+    let resiBaru = "ZN-" + Math.floor(1000 + Math.random() * 9000); 
     validResi.push(resiBaru); 
     localStorage.setItem('validResi', JSON.stringify(validResi));
     document.getElementById("hasil-kode-poin").innerText = resiBaru;
@@ -284,7 +316,6 @@ function jalankanLiveOrder() {
         if(activeGame === 'roblox') {
             dibeli = (Math.floor(Math.random() * 10) + 1) * 50 + " Robux";
         } else {
-            // HANYA 1x WDP ATAU 3x WDP (DIAMOND DIHAPUS)
             let itemMl = ["1x WDP", "3x WDP"];
             dibeli = itemMl[Math.floor(Math.random() * itemMl.length)];
         }
