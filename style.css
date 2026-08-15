@@ -18,13 +18,11 @@ body.theme-mlbb {
 body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 0; transition: background-color 0.4s ease; }
 .app-container { max-width: 450px; margin: auto; padding: 15px 15px 80px 15px; position: relative; overflow-x: hidden; }
 
-/* HEADER & MENU */
 .header { background-color: var(--bg-card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--primary); text-align: center; transition: 0.4s; position: relative; }
 .header h1 { margin: 0; color: var(--primary); font-size: 22px; transition: 0.4s; }
 .status-badge { display: inline-block; background: rgba(255, 255, 255, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-top: 5px; font-weight: bold; }
 .menu-btn { position: absolute; left: 15px; top: 15px; font-size: 24px; cursor: pointer; color: var(--primary); transition: 0.4s; }
 
-/* SIDEBAR KEMBALI */
 .sidebar { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background-color: var(--bg-card); border-right: 2px solid var(--primary); transition: 0.3s; z-index: 2000; padding: 20px; box-sizing: border-box; }
 .sidebar.active { left: 0; }
 .close-btn { font-size: 20px; color: #ff3b30; cursor: pointer; text-align: right; margin-bottom: 10px; }
@@ -32,7 +30,6 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-m
 .btn-wa { background-color: #25D366; }
 .btn-tema { background-color: #34495e; margin-bottom: 15px; }
 
-/* SWITCHER */
 .game-switcher { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
 .game-btn { flex: 1; padding: 8px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; color: #777; transition: 0.3s; }
 .game-btn.active { background: rgba(255,255,255,0.1); color: var(--primary); border-color: var(--primary); }
@@ -40,7 +37,11 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-m
 .section-card { background-color: var(--bg-card); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border-color); transition: 0.4s; }
 .section-title { font-size: 15px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
 .badge-ready { background: var(--primary); color: #000; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; }
-.scroll-box { max-height: 180px; overflow-y: auto; overflow-x: hidden; padding-right: 5px; }
+
+/* INI DIA PENYELAMAT DARI LUAR ANGKASA (DITAMBAHIN max-height) */
+.scroll-box { max-height: 220px; overflow-y: auto; overflow-x: hidden; padding-right: 5px; }
+.scroll-box::-webkit-scrollbar { width: 4px; }
+.scroll-box::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
 
 .input-group { display: flex; gap: 10px; margin-bottom: 10px; }
 input { width: 100%; padding: 12px 15px; background-color: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-main); font-size: 14px; box-sizing: border-box; transition: 0.4s; }
@@ -67,7 +68,6 @@ button.btn-beli { width: 100%; padding: 14px; background: var(--primary); color:
 .list-text { flex: 1; line-height: 1.4; }
 .rank-badge { font-size: 20px; font-weight: bold; margin-right: 10px; width: 25px; text-align: center; color: #f1c40f; }
 
-/* EFEK SULTAN DI-BUFF GILA */
 .ava-bulat { width: 35px; height: 35px; border-radius: 50%; margin-right: 12px; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; color: white; flex-shrink: 0; }
 .ava-warga { border: 4px solid #8B4513; }
 .ava-jagoan { border: 4px solid #00FFFF; box-shadow: 0 0 10px #00FFFF; position: relative; }

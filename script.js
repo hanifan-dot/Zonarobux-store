@@ -6,7 +6,7 @@ let activeDiscount = 0;
 let activeVoucherUsed = false;
 let activeGame = 'roblox'; 
 
-let selectedItem = { nama: '', harga: 0 };
+let selectedItem = { nama: '', harga: 0, robux: 0 };
 const KUNCI_RAHASIA = "ZONA2026BOS";
 
 function simpanDB() { localStorage.setItem('usersDB', JSON.stringify(usersDB)); }
@@ -37,12 +37,11 @@ function setGame(game) {
         titleLead.innerText = "👑 Top 5 Sultan Roblox";
     }
     
-    selectedItem = { nama: '', harga: 0 };
-    document.getElementById("infoPajak").style.display = "none";
+    selectedItem = { nama: '', harga: 0, robux: 0 };
+    document.getElementById("infoPajak-card").style.display = "none";
     document.querySelectorAll('.paket-card').forEach(c => c.classList.remove('active'));
     
     document.getElementById("testi-container").innerHTML = '';
-    document.getElementById("leaderboard-container").innerHTML = '';
     generateLeaderboard();
 }
 
@@ -59,8 +58,6 @@ function switchTab(tabName) {
 function cekProfilRbx() {
     let user = document.getElementById("username-rbx").value;
     if(!user) return alert("Ketik Username Roblox lu dulu Bos!");
-    
-    // Pakai API pembuat avatar unik biar kelihatan keren
     document.getElementById("img-pp-rbx").src = "https://robohash.org/" + user + "?set=set3"; 
     document.getElementById("nama-pp-rbx").innerText = "✅ " + user + " (Ditemukan)";
     document.getElementById("profil-preview").style.display = "block";
@@ -70,18 +67,63 @@ function hitungManual() {
     let jumlah = parseInt(document.getElementById("input-robux-manual").value);
     if(!jumlah || jumlah < 10) return alert("Minimal order 10 Robux Bos!");
     
-    // Rate 150 Perak per Robux
     let harga = jumlah * 150; 
-    
     document.querySelectorAll('.paket-card').forEach(c => c.classList.remove('active'));
     
     selectedItem.nama = jumlah + " Robux (Manual)";
     selectedItem.harga = harga;
+    selectedItem.robux = jumlah;
     
-    let hargaDiskon = harga - (harga * (activeDiscount / 100));
-    document.getElementById("hargaRupiah").innerText = "Rp " + hargaDiskon.toLocaleString("id-ID");
-    document.getElementById("detail-item-pilihan").innerText = `Item: ${selectedItem.nama} | ROBLOX`;
-    document.getElementById("infoPajak").style.display = "block";
+    updateBoxTotal();
+}
+
+// --- FITUR RATING & KOMENTAR (MANIPULASI + ASLI) ---
+let fakeReviews = [
+    { nama: "Satria***", star: 5, text: "Gila cepet banget sumpah, kirain nipu taunya real." },
+    { nama: "RizkyGaming", star: 5, text: "Amanah 100% bos, point rewardnya mantap!" },
+    { nama: "BocilKematian", star: 5, text: "Murah parah, bisa buat modal gacha wkwk" },
+    { nama: "Joko_pro", star: 3, text: "Masuknya sekitar 5 menitan, kirain se-detik, tapi gapapa lah aman" },
+    { nama: "Andi_Sad", star: 1, text: "Admin balesnya agak lama, mungkin lagi makan" }
+];
+let userReviews = JSON.parse(localStorage.getItem('userReviews')) || [];
+
+function renderReviews() {
+    let container = document.getElementById("review-list");
+    container.innerHTML = "";
+    
+    let allRevs = userReviews.concat(fakeReviews);
+    
+    allRevs.forEach(r => {
+        let stars = "⭐".repeat(r.star);
+        container.innerHTML += `<div class="list-item" style="flex-direction: column; align-items: flex-start; padding: 12px; border-bottom: 1px solid var(--border-color); background: var(--input-bg); margin-bottom: 8px; border-radius: 8px;">
+            <div style="font-size: 13px; font-weight: bold; color: var(--text-main);">${r.nama} <span style="font-size:10px;">${stars}</span></div>
+            <div style="font-size: 12px; margin-top: 6px; color: #aaa;">"${r.text}"</div>
+        </div>`;
+    });
+    
+    let c5 = 487 + userReviews.filter(r=>r.star==5).length;
+    let c4 = 0 + userReviews.filter(r=>r.star==4).length;
+    let c3 = 10 + userReviews.filter(r=>r.star==3).length;
+    let c2 = 0 + userReviews.filter(r=>r.star==2).length;
+    let c1 = 3 + userReviews.filter(r=>r.star==1).length;
+    
+    document.getElementById("stat-s5").innerText = `⭐⭐⭐⭐⭐ 5 (${c5} orang)`;
+    document.getElementById("stat-s3").innerText = `⭐⭐⭐ 3 (${c3} orang)`;
+    document.getElementById("stat-s1").innerText = `⭐ 1 (${c1} orang)`;
+}
+
+function tambahKomen() {
+    let txt = document.getElementById("input-komen").value;
+    let st = parseInt(document.getElementById("input-star").value);
+    if(txt.length < 3) return alert("Komentar minimal 3 huruf Bos!");
+    
+    let nm = currentUser ? currentUser : "Tamu_0" + Math.floor(Math.random()*99);
+    userReviews.unshift({ nama: nm, star: st, text: txt }); 
+    localStorage.setItem('userReviews', JSON.stringify(userReviews));
+    
+    document.getElementById("input-komen").value = "";
+    renderReviews();
+    alert("✅ Ulasan berhasil ditambahkan, makasih Bos!");
 }
 
 // --- AKUN ---
@@ -106,13 +148,8 @@ function prosesAuth() {
 
     if(isLoginMode) {
         if(usersDB[user] && usersDB[user].pass === pass) {
-            tutupModalAuth();
-            localStorage.setItem("loggedInUser", user);
-            currentUser = user;
-            
-            let petasan = document.getElementById("animasi-petasan");
-            petasan.style.display = "flex"; petasan.style.opacity = "1";
-            setTimeout(() => { petasan.style.opacity = "0"; setTimeout(() => { petasan.style.display = "none"; refreshProfil(); }, 1000); }, 2000);
+            tutupModalAuth(); localStorage.setItem("loggedInUser", user); currentUser = user;
+            alert("Login Berhasil!"); refreshProfil();
         } else alert("❌ Username/Password salah!");
     } else {
         if(usersDB[user]) alert("❌ Username terdaftar!");
@@ -129,7 +166,6 @@ function updateRank(u) {
     if(u.point >= 150 || u.topup >= 15) u.rank = "Sultan";
     else if(u.point >= 50 || u.topup >= 5) u.rank = "Jagoan";
     else u.rank = "Warga";
-    
     if(oldRank !== u.rank && u.rank !== "Warga") { u.voucher += 1; alert(`🎉 Naik pangkat ke ${u.rank}. Dapat 1 Voucher!`); }
 }
 
@@ -138,7 +174,6 @@ function refreshProfil() {
         document.getElementById("view-belum-login").style.display = "none";
         document.getElementById("view-sudah-login").style.display = "block";
         document.getElementById("box-tukar-poin").style.display = "block";
-        
         let u = usersDB[currentUser];
         updateRank(u); simpanDB();
         
@@ -167,20 +202,32 @@ function refreshProfil() {
 }
 
 // --- TRANSAKSI ---
-function pilihPaket(tipeGame, namaItem, hargaAsli, elemen) {
+function pilihPaket(tipeGame, namaItem, hargaAsli, elemen, jumlahRobux) {
     document.querySelectorAll('.paket-card').forEach(c => c.classList.remove('active'));
     elemen.classList.add('active'); 
     
-    // Reset manual input kalau milih paket kotak
     if(tipeGame === 'rbx') document.getElementById("input-robux-manual").value = "";
     
     selectedItem.nama = namaItem;
     selectedItem.harga = hargaAsli;
+    selectedItem.robux = jumlahRobux;
     
-    let hargaDiskon = hargaAsli - (hargaAsli * (activeDiscount / 100));
+    updateBoxTotal();
+}
+
+function updateBoxTotal() {
+    let hargaDiskon = selectedItem.harga - (selectedItem.harga * (activeDiscount / 100));
     document.getElementById("hargaRupiah").innerText = "Rp " + hargaDiskon.toLocaleString("id-ID");
-    document.getElementById("detail-item-pilihan").innerText = `Item: ${namaItem} | ${activeGame.toUpperCase()}`;
-    document.getElementById("infoPajak").style.display = "block";
+    
+    let textDetail = `<span style="color:#fff;">✔️ Item terpilih: <b>${selectedItem.nama} | ${activeGame.toUpperCase()}</b></span>`;
+    
+    if(activeGame === 'roblox' && selectedItem.robux > 0) {
+        let butuhGamepass = Math.ceil(selectedItem.robux / 0.7);
+        textDetail += `<br><br><span style="color:#f1c40f; font-weight:bold; font-size:14px; display:block; padding:8px; background:rgba(241,196,15,0.1); border-radius:5px; border:1px dashed #f1c40f;">⚠️ PENTING: Atur Harga Gamepass akun lu jadi senilai <b style="font-size:16px;">${butuhGamepass} Robux</b> biar pas pajaknya.</span>`;
+    }
+
+    document.getElementById("detail-item-pilihan").innerHTML = textDetail;
+    document.getElementById("infoPajak-card").style.display = "block";
 }
 
 function klaimPromo() {
@@ -193,7 +240,7 @@ function klaimPromo() {
         if(!u.codes) u.codes = [];
         u.codes.push(code); simpanDB(); activeDiscount = 15;
         alert("✅ Diskon 15% aktif."); 
-        if(selectedItem.harga > 0) pilihPaket(activeGame, selectedItem.nama, selectedItem.harga, document.querySelector('.paket-card.active'));
+        if(selectedItem.harga > 0) updateBoxTotal();
     } else alert("❌ Kode promo salah!");
 }
 
@@ -202,20 +249,19 @@ function pakaiVoucher() {
     let u = usersDB[currentUser];
     if(u.voucher > 0) {
         activeVoucherUsed = true; activeDiscount = 10;
-        let hargaDiskon = selectedItem.harga - (selectedItem.harga * 0.10);
-        document.getElementById("hargaRupiah").innerText = "Rp " + hargaDiskon.toLocaleString("id-ID");
+        updateBoxTotal();
         alert("🎫 Voucher 10% Diaktifkan!");
     }
 }
 
-function pesanWa(game) {
+function pesanWaGlobal() {
     if(selectedItem.harga === 0) return alert("Pilih paket dulu Bos!");
     
     let userDetail = "";
-    if(game === 'roblox') {
+    if(activeGame === 'roblox') {
         let userRbx = document.getElementById("username-rbx").value;
         let linkRbx = document.getElementById("link-rbx").value;
-        if(!userRbx || !linkRbx) return alert("Lengkapi data Roblox (Username & Link)!");
+        if(!userRbx || !linkRbx) return alert("Lengkapi data Roblox (Username & Link Gamepass)!");
         userDetail = `👤 Username: ${userRbx}%0A🔗 Link: ${linkRbx}`;
     } else {
         let idMl = document.getElementById("userid-mlbb").value;
@@ -232,13 +278,11 @@ function pesanWa(game) {
     }
     
     let total = document.getElementById("hargaRupiah").innerText;
-    let teks = `Halo Admin Zona! Order Masuk:%0A%0A📦 Game: ${game.toUpperCase()}%0A💎 Item: ${selectedItem.nama}%0A💰 Total: ${total}%0A${userDetail}%0A%0A(Admin, tolong kasih kode poin ke saya kalau sudah diproses ya!)`;
+    let teks = `Halo Admin Zona! Order Masuk:%0A%0A📦 Game: ${activeGame.toUpperCase()}%0A💎 Item: ${selectedItem.nama}%0A💰 Total: ${total}%0A${userDetail}%0A%0A(Admin, minta kode resi +25 Poin nya dong kalau udah beres!)`;
     
-    alert(`Pesanan Dibuat! Lanjut ke WA Admin.`);
-    window.open("https://wa.me/6289672344059?text=" + teks, "_blank");
+    window.open("https://wa.me/62895613282875?text=" + teks, "_blank");
 }
 
-// --- SISTEM ADMIN BIKIN KODE POIN ---
 function generateKodePoin() {
     let resiBaru = "ZN-" + Math.floor(1000 + Math.random() * 9000); 
     validResi.push(resiBaru); 
@@ -251,7 +295,8 @@ function klaimResi() {
     let resi = document.getElementById("input-resi").value.toUpperCase();
     if(validResi.includes(resi)) {
         validResi = validResi.filter(r => r !== resi); localStorage.setItem('validResi', JSON.stringify(validResi));
-        usersDB[currentUser].point += 10; simpanDB(); alert("✅ Kode valid! Dapat +10 Poin."); refreshProfil();
+        usersDB[currentUser].point += 25; 
+        simpanDB(); alert("✅ Kode valid! Dapat +25 Poin Reward."); refreshProfil();
     } else alert("❌ Kode tidak valid atau sudah dipakai!");
 }
 
@@ -284,14 +329,12 @@ function verifikasiKode() {
     } catch(e) { alert("❌ KODE RUSAK!"); }
 }
 
-// --- PSIKOLOGI MARKETING ---
 const inisial = ['B', 'A', 'H', 'Z', 'M', 'R', 'S', 'D', 'W', 'K'];
 const warnanya = ['#e74c3c', '#9b59b6', '#3498db', '#2ecc71', '#f1c40f'];
 
 function generateLeaderboard() {
     const container = document.getElementById("leaderboard-container");
     container.innerHTML = ''; 
-    
     let topAngka = activeGame === 'roblox' ? [2000, 1500, 1200, 1000, 800] : [15, 10, 8, 5, 3]; 
     let suffix = activeGame === 'roblox' ? 'Robux' : 'x WDP';
     let ikon = activeGame === 'roblox' ? '💎' : '🎟️';
@@ -327,10 +370,11 @@ function jalankanLiveOrder() {
         let container = document.getElementById("testi-container");
         if(container) {
             container.insertBefore(el, container.firstChild);
-            if (container.children.length > 15) container.removeChild(container.lastChild);
+            // DI SINI GUA BATASIN MAKSIMAL 10 ITEM BIAR NGGAK BERAT
+            if (container.children.length > 10) container.removeChild(container.lastChild);
         }
         jalankanLiveOrder();
     }, delay);
 }
 
-window.onload = () => { generateLeaderboard(); jalankanLiveOrder(); refreshProfil(); };
+window.onload = () => { generateLeaderboard(); jalankanLiveOrder(); refreshProfil(); renderReviews(); };
