@@ -6,7 +6,7 @@
     <title>ZONA TOPUP - Roblox & MLBB</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dark-mode">
 
 <div id="animasi-petasan" class="overlay-petasan">
     <div class="teks-hore">🎉 Horeee!<br>Berhasil 🎆</div>
@@ -25,16 +25,26 @@
 
 <!-- PANEL ADMIN RAHASIA -->
 <div id="modal-admin" class="modal-overlay" style="display:none;">
-    <div class="modal-content" style="border-color: #f1c40f;">
+    <div class="modal-content" style="border-color: #f1c40f; max-height: 80vh; overflow-y: auto;">
         <h2 style="color:#f1c40f; margin-top:0;">⚙️ Panel Admin</h2>
-        <p style="font-size: 12px; margin-bottom: 5px;">1. Cek Kode Penukaran Hadiah</p>
-        <input type="text" id="input-kode-admin" placeholder="Paste Kode Verifikasi...">
-        <button class="btn-beli" style="background:#f1c40f; color:#000; padding: 10px; margin-bottom: 15px;" onclick="verifikasiKode()">Cek Kode</button>
+        
+        <p style="font-size: 12px; margin-bottom: 5px; color: #2ecc71; font-weight:bold;">1. Cek Kode Hadiah Tunai (50RB / 2RB)</p>
+        <input type="text" id="input-kode-uang" placeholder="Paste Kode Uang Tunai...">
+        <button class="btn-beli" style="background:#2ecc71; color:#000; padding: 10px; margin-bottom: 15px;" onclick="verifikasiUang()">Cek Validasi Tunai</button>
+
         <hr style="border: 1px solid var(--border-color); margin-bottom: 15px;">
-        <p style="font-size: 12px; margin-bottom: 5px;">2. Buat Kode +25 Poin Buat Pembeli</p>
-        <button class="btn-beli" style="background:#2ecc71; color:#000; padding: 10px;" onclick="generateKodePoin()">Buat Kode Poin Baru</button>
-        <p id="hasil-kode-poin" style="color:#2ecc71; font-weight:bold; text-align:center; margin-top:10px; font-size: 20px; letter-spacing: 2px; user-select: all;"></p>
-        <p onclick="document.getElementById('modal-admin').style.display='none'" style="cursor:pointer; color:#ff3b30; font-size:12px; margin-top:15px; text-align:center;">Tutup Panel</p>
+
+        <p style="font-size: 12px; margin-bottom: 5px;">2. Cek Kode Penukaran Poin Biasa</p>
+        <input type="text" id="input-kode-admin" placeholder="Paste Kode Tukar Poin...">
+        <button class="btn-beli" style="background:#f1c40f; color:#000; padding: 10px; margin-bottom: 15px;" onclick="verifikasiKode()">Cek Kode Poin</button>
+        
+        <hr style="border: 1px solid var(--border-color); margin-bottom: 15px;">
+        
+        <p style="font-size: 12px; margin-bottom: 5px;">3. Buat Kode +25 Poin Buat Pembeli</p>
+        <button class="btn-beli" style="background:#3498db; color:#fff; padding: 10px;" onclick="generateKodePoin()">Buat Kode Poin Baru</button>
+        <p id="hasil-kode-poin" style="color:#3498db; font-weight:bold; text-align:center; margin-top:10px; font-size: 20px; letter-spacing: 2px; user-select: all;"></p>
+        
+        <p onclick="document.getElementById('modal-admin').style.display='none'" style="cursor:pointer; color:#ff3b30; font-size:12px; margin-top:15px; text-align:center; font-weight:bold;">TUTUP PANEL</p>
     </div>
 </div>
 
@@ -47,13 +57,13 @@
     <div style="margin-top: 20px; background: var(--input-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
         <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: bold;">Punya Kode Promo?</p>
         <input type="text" id="input-promo" placeholder="Ketik di sini" style="margin-bottom: 10px;">
-        <button class="btn-cek" style="width: 100%;" onclick="klaimPromo()">Klaim Diskon 15%</button>
+        <button class="btn-cek" style="width: 100%;" onclick="klaimPromo()">Klaim Diskon</button>
     </div>
     <div style="margin-top: 15px; background: var(--input-bg); padding: 15px; border-radius: 8px; border: 1px solid #f1c40f;">
-        <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: bold; color: #f1c40f;">Klaim +25 Poin Transaksi</p>
+        <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: bold; color: #f1c40f;">Klaim +25 Koin Gacha!</p>
         <p style="font-size: 10px; margin-top: 0;">Masukkan kode dari Admin setelah bayar.</p>
         <input type="text" id="input-resi" placeholder="Contoh: ZN-1234" style="margin-bottom: 10px;">
-        <button class="btn-cek" style="width: 100%; color: #f1c40f; border-color: #f1c40f;" onclick="klaimResi()">Klaim Poin</button>
+        <button class="btn-cek" style="width: 100%; color: #f1c40f; border-color: #f1c40f;" onclick="klaimResi()">Klaim Koin</button>
     </div>
 </div>
 
@@ -63,8 +73,12 @@
         <h1 id="header-title">ZONA TOPUP</h1>
         <div class="status-badge">🟢 Admin Hanifan Online</div>
         <div class="game-switcher">
-            <div id="btn-roblox" class="game-btn active" onclick="setGame('roblox')">🟩 Roblox</div>
-            <div id="btn-mlbb" class="game-btn" onclick="setGame('mlbb')">🟦 MLBB</div>
+            <div id="btn-roblox" class="game-btn active" onclick="setGame('roblox')">
+                <img src="4354.png" alt="Roblox" style="height: 20px; object-fit: contain;">
+            </div>
+            <div id="btn-mlbb" class="game-btn" onclick="setGame('mlbb')">
+                <img src="4355.jpg" alt="MLBB" style="height: 20px; object-fit: contain; border-radius: 4px;">
+            </div>
         </div>
     </div>
 
@@ -72,45 +86,53 @@
     <div id="tab-beranda" class="tab-content active">
         <div class="section-card">
             <div class="section-title">Pesanan Terbaru 🚀 <span style="font-size:10px; color:var(--primary);">🔴 Live</span></div>
-            <!-- INI KOTAK YANG BIKIN NEMBUS LUAR ANGKASA UDAH DIKUNCI -->
             <div id="testi-container" class="scroll-box"></div>
         </div>
         
-        <!-- FITUR RATING & KOMENTAR -->
-        <div class="section-card" style="border-color: #f1c40f;">
-            <div class="section-title" style="color: #f1c40f;">Ulasan Pelanggan ⭐ 4.9/5.0</div>
-            <div style="font-size: 12px; margin-bottom: 15px; background: var(--input-bg); padding: 10px; border-radius: 8px;">
-                <div id="stat-s5" style="color: #f1c40f; margin-bottom: 3px;">⭐⭐⭐⭐⭐ 5 (487 orang)</div>
-                <div id="stat-s3" style="color: #f39c12; margin-bottom: 3px;">⭐⭐⭐ 3 (10 orang)</div>
-                <div id="stat-s1" style="color: #e74c3c;">⭐ 1 (3 orang)</div>
+        <!-- GRID KOTAK 1 & 2 (SULTAN & ULASAN BERSEBELAHAN) -->
+        <div class="grid-2-col">
+            <!-- Kotak 1: Top Sultan -->
+            <div class="section-card" style="margin-bottom: 0;">
+                <div class="section-title" id="title-leaderboard" style="font-size: 13px;">👑 Top 5 Sultan</div>
+                <div id="leaderboard-container"></div>
             </div>
-            <div id="review-list" class="scroll-box" style="margin-bottom: 15px; border-top: 1px solid var(--border-color); padding-top: 10px;">
-                <!-- Komen JS masuk sini -->
-            </div>
-            
-            <div style="border-top: 1px solid var(--border-color); padding-top: 15px;">
-                <p style="font-size: 12px; margin-top: 0; font-weight:bold;">Tulis Pengalamanmu:</p>
-                <select id="input-star" style="width: 100%; padding: 10px; margin-bottom: 10px; background: var(--input-bg); color: #fff; border: 1px solid var(--border-color); border-radius: 8px;">
-                    <option value="5">⭐⭐⭐⭐⭐ Sangat Puas</option>
-                    <option value="4">⭐⭐⭐⭐ Puas</option>
-                    <option value="3">⭐⭐⭐ Lumayan</option>
-                    <option value="2">⭐⭐ Kurang</option>
+
+            <!-- Kotak 2: Ulasan Pelanggan -->
+            <div class="section-card" style="margin-bottom: 0; border-color: #f1c40f;">
+                <div class="section-title" style="color: #f1c40f; font-size: 13px;">⭐ Ulasan (4.9/5)</div>
+                <div style="font-size: 10px; margin-bottom: 10px; background: var(--input-bg); padding: 8px; border-radius: 6px;">
+                    <div id="stat-s5" style="color: #f1c40f;">⭐⭐⭐⭐⭐ 5 (487)</div>
+                    <div id="stat-s3" style="color: #f39c12;">⭐⭐⭐ 3 (10)</div>
+                    <div id="stat-s1" style="color: #e74c3c;">⭐ 1 (3)</div>
+                </div>
+                <div id="review-list" class="scroll-box" style="max-height: 120px; margin-bottom: 10px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                    <!-- Komen JS masuk sini -->
+                </div>
+                <select id="input-star" style="width: 100%; padding: 5px; font-size: 10px; margin-bottom: 5px; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 5px;">
+                    <option value="5">⭐⭐⭐⭐⭐ Puas</option>
                     <option value="1">⭐ Kecewa</option>
                 </select>
-                <input type="text" id="input-komen" placeholder="Tulis komentar... (Cth: Mantap!)" style="margin-bottom: 10px;">
-                <button class="btn-cek" style="width: 100%;" onclick="tambahKomen()">Kirim Ulasan</button>
+                <input type="text" id="input-komen" placeholder="Tulis..." style="padding: 6px; font-size: 11px; margin-bottom: 5px;">
+                <button class="btn-cek" style="width: 100%; padding: 6px; font-size: 11px;" onclick="tambahKomen()">Kirim</button>
             </div>
         </div>
 
-        <div class="section-card">
-            <div class="section-title" id="title-leaderboard">👑 Top 5 Sultan Roblox</div>
-            <div id="leaderboard-container"></div>
+        <!-- FITUR FAQ DI BAWAHNYA -->
+        <div class="section-card" style="margin-top: 15px;">
+            <div class="section-title">❓ Pertanyaan Sering Diajukan</div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">Apakah akun dijamin aman dari banned? <span>+</span></div>
+                <div class="faq-answer">100% Aman Bos! Kita menggunakan sistem transfer via Gamepass resmi yang dipantau langsung oleh sistem keamanan Roblox.</div>
+            </div>
+            <div class="faq-item" onclick="toggleFaq(this)">
+                <div class="faq-question">Kenapa WDP di sini bisa lebih murah? <span>+</span></div>
+                <div class="faq-answer">Karena Zona Topup mengambil margin keuntungan yang tipis agar pelanggan setia bisa gacha tanpa bikin dompet jebol!</div>
+            </div>
         </div>
     </div>
 
     <!-- TAB TOPUP -->
     <div id="tab-topup" class="tab-content" style="display: none;">
-        
         <!-- BAGIAN ROBLOX -->
         <div id="topup-roblox">
             <div class="section-card">
@@ -139,7 +161,6 @@
                         <div class="paket-harga-asli">Rp 75.000</div>
                     </div>
                 </div>
-                
                 <div style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
                     <p style="font-size: 12px; margin-top: 0; margin-bottom: 5px; color: #aaa;">Beli Nominal Lain (Ketik Manual):</p>
                     <div class="input-group">
@@ -176,8 +197,8 @@
             </div>
         </div>
 
-        <!-- TOTAL BAYAR GLOBAL -->
-        <div class="section-card" id="infoPajak-card" style="display:none; border-color: var(--primary); background: var(--bg-card); box-shadow: 0 0 10px rgba(0,0,0,0.5);">
+        <!-- TOTAL BAYAR GLOBAL DENGAN GARANSI -->
+        <div class="section-card" id="infoPajak-card" style="display:none; border-color: var(--primary); background: var(--bg-card); box-shadow: 0 0 15px rgba(46, 204, 113, 0.2);">
             <div style="font-size:14px; font-weight:bold; margin-bottom:5px;">💰 Total Pembayaran:</div>
             <div id="hargaRupiah" style="font-size:24px; font-weight:900; color:var(--primary); margin-bottom:10px;">Rp 0</div>
             
@@ -187,14 +208,70 @@
                 <button class="btn-cek" onclick="pakaiVoucher()" style="width:100%; border:1px solid #e74c3c; color:#e74c3c;">🎫 Pakai 1 Voucher (-10%)</button>
             </div>
 
-            <button class="btn-beli" style="margin-top:15px; font-size:18px;" onclick="pesanWaGlobal()">🛒 Pesan via WhatsApp</button>
+            <!-- LOGO GARANSI -->
+            <div style="text-align: center; margin-top: 20px; margin-bottom: 5px;">
+                <span style="background: rgba(46, 204, 113, 0.1); color: var(--primary); padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid var(--primary);">
+                    🛡️ 100% Garansi Uang Kembali Jika Gagal
+                </span>
+            </div>
+
+            <button class="btn-beli" style="margin-top:10px; font-size:18px;" onclick="pesanWaGlobal()">🛒 Pesan via WhatsApp</button>
+        </div>
+        
+        <!-- BANNER METODE PEMBAYARAN -->
+        <div style="text-align: center; margin-top: 20px; padding: 10px; border-top: 1px dashed var(--border-color);">
+            <p style="font-size: 10px; color: #777; margin-bottom: 8px;">Metode Pembayaran Terverifikasi:</p>
+            <div style="display: flex; justify-content: center; gap: 10px; font-weight: bold; font-size: 12px; color: #555;">
+                <span>QRIS</span> | <span>DANA</span> | <span>GOPAY</span> | <span>OVO</span> | <span>BCA</span>
+            </div>
         </div>
     </div>
 
-    <!-- TAB TRANSAKSI -->
+    <!-- TAB ARCADE GACHA (BARU) -->
+    <div id="tab-arcade" class="tab-content" style="display: none;">
+        <div class="section-card" style="text-align: center; border-color: #ff4757; background: linear-gradient(180deg, #2d3436 0%, #1a201e 100%); position: relative; overflow: hidden;">
+            <h2 style="color: #ff4757; margin-top: 0; text-transform: uppercase; font-weight: 900; letter-spacing: 2px;">🎰 Claw Machine</h2>
+            <p style="font-size: 12px; color: #ccc;">Uji Hoki! Dapatkan Uang Tunai 50RB, Robux, atau Koin.</p>
+            
+            <div style="background: #000; height: 200px; border-radius: 10px; border: 3px solid #ff4757; margin: 15px 0; position: relative; overflow: hidden;" id="gacha-mesin">
+                <!-- Tali dan Capit -->
+                <div id="claw-arm"></div>
+                <div id="claw-hand"></div>
+                
+                <!-- Tumpukan Telur Palsu di bawah -->
+                <div style="position: absolute; bottom: -10px; left: 0; width: 100%; height: 50px; background: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/200%22 width=%2240%22 height=%2240%22><circle cx=%2220%22 cy=%2220%22 r=%2215%22 fill=%22%23ff6b81%22 opacity=%220.6%22/><circle cx=%225%22 cy=%2225%22 r=%2215%22 fill=%22%237bed9f%22 opacity=%220.6%22/><circle cx=%2235%22 cy=%2215%22 r=%2215%22 fill=%22%2370a1ff%22 opacity=%220.6%22/></svg>');"></div>
+
+                <!-- Telur Hasil Gacha yang akan ditarik -->
+                <div id="gacha-egg"></div>
+                <div id="particle-container"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                <div style="font-size: 14px; font-weight: bold;">Saldo Koin: <span id="arcade-koin" style="color: #f1c40f;">0</span></div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-beli" style="background: #ff4757; color: #fff; font-size: 14px;" onclick="spinGacha(1)">🔘 Main 1x (5 Koin)</button>
+                <button class="btn-beli" style="background: #ff6b81; color: #fff; font-size: 14px;" onclick="spinGacha(10)">🔘 Main 10x (50 Koin)</button>
+            </div>
+        </div>
+
+        <div class="grid-2-col" style="margin-top: 15px;">
+            <div class="section-card" style="text-align: center; border-color: #777; filter: grayscale(100%);">
+                <h4 style="margin: 0 0 5px 0;">🎫 Gosok Hadiah</h4>
+                <p style="font-size: 10px; margin: 0;">Segera Hadir...</p>
+            </div>
+            <div class="section-card" style="text-align: center; border-color: #777; filter: grayscale(100%);">
+                <h4 style="margin: 0 0 5px 0;">🎡 Spin Wheel</h4>
+                <p style="font-size: 10px; margin: 0;">Segera Hadir...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB TRANSAKSI (History) -->
     <div id="tab-transaksi" class="tab-content" style="display: none;">
         <div class="section-card" id="box-tukar-poin" style="display: none; border-color: #f1c40f;">
-            <div class="section-title" style="color: #f1c40f;">🪙 Tukar Poin Reward</div>
+            <div class="section-title" style="color: #f1c40f;">🪙 Tukar Poin Manual</div>
             <p style="font-size: 12px; margin-top: 0;">150 Poin = 10 Robux / 12 Diamond MLBB Gratis</p>
             <div class="input-group">
                 <input type="number" id="input-tukar-poin" placeholder="Kelipatan 150 poin">
@@ -224,7 +301,7 @@
             <div id="pangkat-badge" style="display:inline-block; margin-top:5px; padding:3px 10px; border-radius:15px; font-size:12px; font-weight:bold; background:#8B4513; color:#fff;">Warga</div>
             
             <div style="display: flex; justify-content: space-between; background: var(--bg-main); padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px solid var(--border-color);">
-                <div><div style="font-size: 12px;">Poin</div><div style="font-weight: bold; color: #f1c40f;" id="text-poin">🪙 0</div></div>
+                <div><div style="font-size: 12px;">Koin</div><div style="font-weight: bold; color: #f1c40f;" id="text-poin">🪙 0</div></div>
                 <div><div style="font-size: 12px;">Top Up</div><div style="font-weight: bold;" id="text-topup">🛒 0x</div></div>
                 <div><div style="font-size: 12px;">Voucher</div><div style="font-weight: bold; color: #e74c3c;" id="text-voucher">🎫 0</div></div>
             </div>
@@ -235,10 +312,18 @@
     </div>
 </div>
 
+<!-- FLOATING CS WHATSAPP -->
+<div class="floating-cs" onclick="window.open('https://wa.me/62895613282875', '_blank')">
+    <div class="cs-dot"></div>
+    CS Zona
+</div>
+
 <nav class="bottom-nav">
     <div class="nav-item active" id="nav-beranda" onclick="switchTab('beranda')"><div class="nav-icon">🏠</div><span>Beranda</span></div>
     <div class="nav-item" id="nav-topup" onclick="switchTab('topup')"><div class="nav-icon">💎</div><span>Top Up</span></div>
-    <div class="nav-item" id="nav-transaksi" onclick="switchTab('transaksi')"><div class="nav-icon">🧾</div><span>Transaksi</span></div>
+    <!-- TOMBOL ARCADE DI TENGAH -->
+    <div class="nav-item" id="nav-arcade" onclick="switchTab('arcade')"><div class="nav-icon" style="color:#ff4757;">🎰</div><span style="color:#ff4757;">Arcade</span></div>
+    <div class="nav-item" id="nav-transaksi" onclick="switchTab('transaksi')"><div class="nav-icon">🧾</div><span>Riwayat</span></div>
     <div class="nav-item" id="nav-profil" onclick="switchTab('profil')"><div class="nav-icon">👤</div><span>Profil</span></div>
 </nav>
 

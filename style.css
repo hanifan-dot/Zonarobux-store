@@ -1,5 +1,15 @@
 :root {
     --primary: #2ecc71; 
+    --bg-main: #f4f6f8;
+    --bg-card: #ffffff;
+    --border-color: #e0e0e0;
+    --text-main: #333333;
+    --input-bg: #f9f9f9;
+}
+
+/* FIX DARK MODE JADI DEFAULT */
+body.dark-mode {
+    --primary: #2ecc71; 
     --bg-main: #0d100f;
     --bg-card: #1a201e;
     --border-color: #2a3530;
@@ -7,20 +17,25 @@
     --input-bg: #0f1211;
 }
 
-body.theme-mlbb {
+body.theme-mlbb.dark-mode {
     --primary: #00cec9; 
     --bg-main: #0a1118;
     --bg-card: #121f2b;
     --border-color: #1a3346;
     --input-bg: #0b151d;
 }
+body.theme-mlbb { --primary: #00cec9; }
 
 body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-main); color: var(--text-main); margin: 0; padding: 0; transition: background-color 0.4s ease; }
-.app-container { max-width: 450px; margin: auto; padding: 15px 15px 80px 15px; position: relative; overflow-x: hidden; }
+.app-container { max-width: 450px; margin: auto; padding: 15px 15px 90px 15px; position: relative; overflow-x: hidden; }
+
+/* GRID UNTUK SULTAN DAN ULASAN */
+.grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 360px) { .grid-2-col { grid-template-columns: 1fr; } } /* Biar di HP super kecil numpuk bawah */
 
 .header { background-color: var(--bg-card); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--primary); text-align: center; transition: 0.4s; position: relative; }
 .header h1 { margin: 0; color: var(--primary); font-size: 22px; transition: 0.4s; }
-.status-badge { display: inline-block; background: rgba(255, 255, 255, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-top: 5px; font-weight: bold; }
+.status-badge { display: inline-block; background: rgba(46, 204, 113, 0.1); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-size: 12px; margin-top: 5px; font-weight: bold; }
 .menu-btn { position: absolute; left: 15px; top: 15px; font-size: 24px; cursor: pointer; color: var(--primary); transition: 0.4s; }
 
 .sidebar { position: fixed; top: 0; left: -300px; width: 280px; height: 100%; background-color: var(--bg-card); border-right: 2px solid var(--primary); transition: 0.3s; z-index: 2000; padding: 20px; box-sizing: border-box; }
@@ -31,14 +46,12 @@ body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: var(--bg-m
 .btn-tema { background-color: #34495e; margin-bottom: 15px; }
 
 .game-switcher { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
-.game-btn { flex: 1; padding: 8px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; color: #777; transition: 0.3s; }
+.game-btn { flex: 1; padding: 8px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; color: #777; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
 .game-btn.active { background: rgba(255,255,255,0.1); color: var(--primary); border-color: var(--primary); }
 
 .section-card { background-color: var(--bg-card); border-radius: 12px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--border-color); transition: 0.4s; }
 .section-title { font-size: 15px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
 .badge-ready { background: var(--primary); color: #000; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: bold; }
-
-/* INI DIA PENYELAMAT DARI LUAR ANGKASA (DITAMBAHIN max-height) */
 .scroll-box { max-height: 220px; overflow-y: auto; overflow-x: hidden; padding-right: 5px; }
 .scroll-box::-webkit-scrollbar { width: 4px; }
 .scroll-box::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
@@ -58,26 +71,46 @@ button.btn-beli { width: 100%; padding: 14px; background: var(--primary); color:
 .info-box { background-color: rgba(255, 255, 255, 0.05); border-left: 4px solid var(--primary); padding: 12px; margin-bottom: 15px; font-size: 13px; border-radius: 4px; display: none; }
 
 .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 450px; background-color: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; padding: 10px 0 15px 0; z-index: 1000; transition: 0.4s; }
-.nav-item { display: flex; flex-direction: column; align-items: center; color: #777; cursor: pointer; font-size: 11px; font-weight: bold; width: 25%; transition: 0.3s; }
-.nav-icon { font-size: 22px; margin-bottom: 3px; filter: grayscale(100%); transition: 0.2s; }
+.nav-item { display: flex; flex-direction: column; align-items: center; color: #777; cursor: pointer; font-size: 10px; font-weight: bold; width: 20%; transition: 0.3s; }
+.nav-icon { font-size: 20px; margin-bottom: 3px; filter: grayscale(100%); transition: 0.2s; }
 .nav-item.active { color: var(--primary); }
 .nav-item.active .nav-icon { filter: grayscale(0%); transform: translateY(-3px); }
 
 .list-item { display: flex; align-items: center; padding: 10px 5px; border-bottom: 1px solid var(--border-color); font-size: 13px; transition: 0.4s; }
 .list-item:last-child { border-bottom: none; }
 .list-text { flex: 1; line-height: 1.4; }
-.rank-badge { font-size: 20px; font-weight: bold; margin-right: 10px; width: 25px; text-align: center; color: #f1c40f; }
+.rank-badge { font-size: 16px; font-weight: bold; margin-right: 5px; width: 20px; text-align: center; color: #f1c40f; }
 
-.ava-bulat { width: 35px; height: 35px; border-radius: 50%; margin-right: 12px; display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; color: white; flex-shrink: 0; }
-.ava-warga { border: 4px solid #8B4513; }
-.ava-jagoan { border: 4px solid #00FFFF; box-shadow: 0 0 10px #00FFFF; position: relative; }
-.ava-sultan { border: 4px solid #FF4500; box-shadow: 0 0 20px #FF4500, inset 0 0 15px #FF4500; position: relative; animation: api 0.6s infinite alternate; }
-.ava-sultan::before { content: '🔥'; position: absolute; left: -18px; top: -5px; font-size: 18px; animation: terbangKiri 0.8s infinite alternate; }
-.ava-sultan::after { content: '🔥'; position: absolute; right: -18px; bottom: -5px; font-size: 18px; animation: terbangKanan 1s infinite alternate-reverse; }
+.ava-bulat { width: 30px; height: 30px; border-radius: 50%; margin-right: 10px; display: flex; justify-content: center; align-items: center; font-size: 12px; font-weight: bold; color: white; flex-shrink: 0; }
+.ava-warga { border: 3px solid #8B4513; }
+.ava-jagoan { border: 3px solid #00FFFF; box-shadow: 0 0 10px #00FFFF; position: relative; }
+.ava-sultan { border: 3px solid #FF4500; box-shadow: 0 0 20px #FF4500, inset 0 0 15px #FF4500; position: relative; animation: api 0.6s infinite alternate; }
+.ava-sultan::before { content: '🔥'; position: absolute; left: -15px; top: -5px; font-size: 14px; animation: terbangKiri 0.8s infinite alternate; }
 
+/* FAQ ACCORDION */
+.faq-item { background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; overflow: hidden; cursor: pointer; }
+.faq-question { padding: 12px; font-size: 13px; font-weight: bold; display: flex; justify-content: space-between; }
+.faq-answer { padding: 0 12px; max-height: 0; overflow: hidden; font-size: 12px; color: #aaa; transition: max-height 0.3s ease, padding 0.3s ease; }
+.faq-item.active .faq-answer { padding: 12px; max-height: 200px; border-top: 1px dashed var(--border-color); }
+
+/* FLOATING CS */
+.floating-cs { position: fixed; bottom: 85px; right: 20px; background: #25D366; color: #fff; padding: 10px 15px; border-radius: 30px; font-weight: bold; font-size: 12px; display: flex; align-items: center; gap: 8px; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.4); cursor: pointer; z-index: 1500; }
+.cs-dot { width: 8px; height: 8px; background: #fff; border-radius: 50%; animation: kedip 1s infinite; }
+@keyframes kedip { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+/* EFEK MESIN CLAW GACHA BIKINAN LU */
+#claw-arm { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 4px; height: 20px; background: #fff; transition: height 1s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 2; }
+#claw-hand { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 40px; height: 30px; border: 4px solid #fff; border-bottom: none; border-radius: 10px 10px 0 0; transition: top 1s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 2; }
+#gacha-egg { position: absolute; top: 150px; left: 50%; transform: translateX(-50%) scale(0); width: 40px; height: 40px; border-radius: 50%; background: #ccc; z-index: 3; transition: top 1s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.3s; display: flex; justify-content: center; align-items: center; font-weight: 900; font-size: 10px; color: #fff; text-shadow: 1px 1px 2px #000; box-shadow: inset 0 -10px 15px rgba(0,0,0,0.5); }
+.grabbed { top: 40px !important; transform: translateX(-50%) scale(1) !important; }
+.particle { position: absolute; width: 8px; height: 8px; background: white; z-index: 4; animation: ledakan 0.8s forwards; }
+
+@keyframes ledakan {
+    0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0) rotate(180deg); opacity: 0; }
+}
 @keyframes api { from { box-shadow: 0 0 15px #FF4500; border-color: #FF4500; transform: scale(1); } to { box-shadow: 0 0 30px #FFD700; border-color: #FFD700; transform: scale(1.05); } }
 @keyframes terbangKiri { from { transform: translateY(0) scale(1); opacity: 1; } to { transform: translateY(-8px) scale(1.2); opacity: 0.6; } }
-@keyframes terbangKanan { from { transform: translateY(0) scale(1); opacity: 1; } to { transform: translateY(-8px) scale(1.2); opacity: 0.6; } }
 
 .item-baru { animation: munculBaru 0.6s ease-out forwards; background-color: rgba(255, 255, 255, 0.05); border-radius: 8px; }
 @keyframes munculBaru { 0% { opacity: 0; transform: translateY(-15px); } 100% { opacity: 1; transform: translateY(0); } }
