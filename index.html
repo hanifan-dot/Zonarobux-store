@@ -1,332 +1,382 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZONA TOPUP - Roblox & MLBB</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Dunia Kotak</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#87bff2;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:none}
+  canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+  #cross{position:fixed;left:50%;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;pointer-events:none;opacity:.85}
+  #cross:before,#cross:after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000}
+  #cross:before{left:8px;top:0;width:2px;height:18px}
+  #cross:after{top:8px;left:0;height:2px;width:18px}
+  #hotbar{position:fixed;left:50%;bottom:8px;transform:translateX(-50%);display:flex;gap:3px;padding:4px;background:rgba(0,0,0,.45);border-radius:8px}
+  .slot{width:min(9vw,44px);height:min(9vw,44px);border:2px solid rgba(255,255,255,.25);border-radius:5px;box-sizing:border-box;padding:3px;background:rgba(0,0,0,.25)}
+  .slot.sel{border-color:#fff;background:rgba(255,255,255,.25)}
+  .slot canvas{width:100%;height:100%;image-rendering:pixelated;display:block}
+  #joy{position:fixed;left:18px;bottom:74px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.35);display:none}
+  #knob{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.55)}
+  .btn{position:fixed;display:none;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:13px;
+    background:rgba(0,0,0,.38);border:2px solid rgba(255,255,255,.45);border-radius:50%;width:68px;height:68px;text-shadow:0 1px 2px #000}
+  .btn.on{background:rgba(255,255,255,.35)}
+  #bJump{right:18px;bottom:74px}
+  #bBreak{right:96px;bottom:104px}
+  #bPlace{right:26px;bottom:156px}
+  .touch #joy{display:block}.touch .btn{display:flex}
+  #menuBtn{position:fixed;left:10px;top:10px;width:40px;height:40px;border-radius:8px;border:0;background:rgba(0,0,0,.4);color:#fff;font-size:20px}
+  .panel{position:fixed;inset:0;background:rgba(10,20,35,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:5}
+  .card{background:#1d2a3a;color:#e8eef5;border-radius:14px;padding:22px;max-width:340px;width:100%;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+  .card h1{margin:0 0 6px;font-size:28px;letter-spacing:1px}
+  .card p{margin:6px 0;font-size:14px;line-height:1.45;color:#b9c6d4}
+  .card ul{text-align:left;font-size:14px;line-height:1.5;color:#cdd8e3;padding-left:20px;margin:10px 0}
+  .card button{margin-top:10px;width:100%;padding:13px;border:0;border-radius:10px;font-size:16px;font-weight:700;background:#5fa83a;color:#fff}
+  .card button.alt{background:#3a4b60;font-weight:600}
+  .hide{display:none!important}
+  #err{color:#ffb4a8}
+</style>
 </head>
-<body class="dark-mode">
+<body>
+<canvas id="c"></canvas>
+<div id="cross"></div>
+<button id="menuBtn" aria-label="Menu">☰</button>
+<div id="joy"><div id="knob"></div></div>
+<div class="btn" id="bBreak">Hancur</div>
+<div class="btn" id="bPlace">Pasang</div>
+<div class="btn" id="bJump">Lompat</div>
+<div id="hotbar"></div>
 
-<div id="animasi-petasan" class="overlay-petasan">
-    <div class="teks-hore">🎉 Horeee!<br>Berhasil 🎆</div>
+<div class="panel" id="start">
+  <div class="card">
+    <h1>DUNIA KOTAK</h1>
+    <p>Game sandbox balok 3D. Jelajahi, hancurkan, dan bangun apa saja.</p>
+    <ul id="help"></ul>
+    <p id="err"></p>
+    <button id="play">Main</button>
+    <button id="newWorld" class="alt hide">Dunia baru</button>
+  </div>
 </div>
 
-<div id="modal-auth" class="modal-overlay" style="display:none;">
-    <div class="modal-content" style="border-color: var(--primary);">
-        <h2 id="modal-title" style="color:var(--primary); margin-top:0;">Buat Akun Resmi</h2>
-        <input type="text" id="reg-user" placeholder="Username (Min 5 huruf)">
-        <input type="password" id="reg-pass" placeholder="Password">
-        <button class="btn-beli" style="margin-top:10px;" onclick="prosesAuth()">Lanjut</button>
-        <p onclick="switchAuth()" id="switch-text" style="cursor:pointer; font-size:12px; margin-top:15px; text-align:center;">Sudah punya akun? Login di sini</p>
-        <p onclick="tutupModalAuth()" style="cursor:pointer; color:#ff3b30; font-size:12px; margin-top:10px; text-align:center;">Batal</p>
-    </div>
-</div>
+<script src="extra.js"></script>
+<script src="extra2.js"></script>
+<script>
+"use strict";
+/* ---------- Konstanta dunia ---------- */
+const W=256,D=256,H=48,CS=16,SEA=14,NCX=W/CS,NCZ=D/CS;
+const AIR=0,GRASS=1,DIRT=2,STONE=3,SAND=4,WATER=5,LOG=6,LEAVES=7,PLANKS=8,BRICK=9,GLASS=10,TABLE=11;
+const HOTBAR=[GRASS,DIRT,STONE,SAND,LOG,LEAVES,PLANKS,BRICK,GLASS];
+// ubin: [atas, samping, bawah]
+const TILES={1:[0,1,2],2:[2,2,2],3:[3,3,3],4:[4,4,4],5:[5,5,5],6:[7,6,7],7:[8,8,8],8:[9,9,9],9:[10,10,10],10:[11,11,11],11:[12,13,9]};
+const blocks=new Uint8Array(W*D*H), hm=new Uint8Array(W*D);
+const idx=(x,y,z)=>(y*D+z)*W+x;
+function get(x,y,z){ if(y<0) return STONE; if(x<0||z<0||x>=W||z>=D||y>=H) return AIR; return blocks[(y*D+z)*W+x]; }
+function solid(x,y,z){ if(x<0||z<0||x>=W||z>=D||y<0) return true; if(y>=H) return false; const b=blocks[(y*D+z)*W+x]; return b!==AIR&&b!==WATER; }
 
-<!-- PANEL ADMIN RAHASIA -->
-<div id="modal-admin" class="modal-overlay" style="display:none;">
-    <div class="modal-content" style="border-color: #f1c40f; max-height: 80vh; overflow-y: auto;">
-        <h2 style="color:#f1c40f; margin-top:0;">⚙️ Panel Admin</h2>
-        
-        <p style="font-size: 12px; margin-bottom: 5px; color: #2ecc71; font-weight:bold;">1. Cek Kode Hadiah Tunai (50RB / 2RB)</p>
-        <input type="text" id="input-kode-uang" placeholder="Paste Kode Uang Tunai...">
-        <button class="btn-beli" style="background:#2ecc71; color:#000; padding: 10px; margin-bottom: 15px;" onclick="verifikasiUang()">Cek Validasi Tunai</button>
+/* ---------- Simpan ---------- */
+const KEY="dunia-kotak-v2";
+let seed=(Math.random()*90000|0)+1, edits={};
+try{ const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s&&s.seed){seed=s.seed;edits=s.edits||{};} }catch(e){}
+let saveT=0;
+function save(){ clearTimeout(saveT); saveT=setTimeout(()=>{ try{localStorage.setItem(KEY,JSON.stringify({seed,edits}));}catch(e){} },600); }
 
-        <hr style="border: 1px solid var(--border-color); margin-bottom: 15px;">
+/* ---------- Pembangkit dunia ---------- */
+function hash(x,z,s){ let h=Math.imul(x,374761393)+Math.imul(z,668265263)+Math.imul(s,1442695041)|0;
+  h=Math.imul(h^(h>>>13),1274126177); h^=h>>>16; return (h>>>0)/4294967296; }
+function vnoise(x,z,s){ const xi=Math.floor(x),zi=Math.floor(z); let fx=x-xi,fz=z-zi; fx=fx*fx*(3-2*fx); fz=fz*fz*(3-2*fz);
+  const a=hash(xi,zi,s),b=hash(xi+1,zi,s),c=hash(xi,zi+1,s),d=hash(xi+1,zi+1,s);
+  return a+(b-a)*fx+(c-a)*fz+(a-b-c+d)*fx*fz; }
+function fbm(x,z){ return (vnoise(x/48,z/48,seed)*8+vnoise(x/24,z/24,seed+1)*4+vnoise(x/12,z/12,seed+2)*2+vnoise(x/6,z/6,seed+3))/15; }
+function generate(){
+  blocks.fill(0);
+  for(let z=0;z<D;z++)for(let x=0;x<W;x++){
+    const h=Math.max(3,Math.min(H-12,Math.floor(4+fbm(x,z)*30)));
+    hm[z*W+x]=h; const sandy=h<=SEA+1;
+    for(let y=0;y<h;y++){
+      let b=STONE; if(y>=h-4) b=sandy?SAND:(y===h-1?GRASS:DIRT);
+      blocks[idx(x,y,z)]=b;
+    }
+    for(let y=h;y<SEA;y++) blocks[idx(x,y,z)]=WATER;
+  }
+  for(let z=3;z<D-3;z++)for(let x=3;x<W-3;x++){
+    const h=hm[z*W+x]; if(h<=SEA+1||hash(x,z,seed+7)>0.014) continue;
+    const th=4+(hash(x,z,seed+8)*2|0), top=h+th-1;
+    for(let ly=top-2;ly<=top+1;ly++){ const r=ly<=top-1?2:1;
+      for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){
+        if(Math.abs(dx)===r&&Math.abs(dz)===r&&(r===1?ly===top+1:hash(x+dx+ly*31,z+dz,seed+9)>0.4)) continue;
+        const i=idx(x+dx,ly,z+dz); if(blocks[i]===AIR) blocks[i]=LEAVES;
+      } }
+    for(let y=h;y<=top;y++) blocks[idx(x,y,z)]=LOG;
+  }
+  EX.ores();EX.village();EX2.gen();
+  for(const k in edits) blocks[+k]=edits[k];
+}
 
-        <p style="font-size: 12px; margin-bottom: 5px;">2. Cek Kode Penukaran Poin Biasa</p>
-        <input type="text" id="input-kode-admin" placeholder="Paste Kode Tukar Poin...">
-        <button class="btn-beli" style="background:#f1c40f; color:#000; padding: 10px; margin-bottom: 15px;" onclick="verifikasiKode()">Cek Kode Poin</button>
-        
-        <hr style="border: 1px solid var(--border-color); margin-bottom: 15px;">
-        
-        <p style="font-size: 12px; margin-bottom: 5px;">3. Buat Kode +25 Poin Buat Pembeli</p>
-        <button class="btn-beli" style="background:#3498db; color:#fff; padding: 10px;" onclick="generateKodePoin()">Buat Kode Poin Baru</button>
-        <p id="hasil-kode-poin" style="color:#3498db; font-weight:bold; text-align:center; margin-top:10px; font-size: 20px; letter-spacing: 2px; user-select: all;"></p>
-        
-        <p onclick="document.getElementById('modal-admin').style.display='none'" style="cursor:pointer; color:#ff3b30; font-size:12px; margin-top:15px; text-align:center; font-weight:bold;">TUTUP PANEL</p>
-    </div>
-</div>
+/* ---------- Tekstur atlas (digambar lewat kode) ---------- */
+const atlas=document.createElement("canvas"); atlas.width=64;atlas.height=256;
+(function(){
+  const g=atlas.getContext("2d"); let rs=12345;
+  const r=()=>{ rs=(Math.imul(rs,1103515245)+12345)&0x7fffffff; return rs/0x7fffffff; };
+  function tile(t,fn){ const im=g.createImageData(16,16);
+    for(let y=0;y<16;y++)for(let x=0;x<16;x++){ const c=fn(x,y,r()),i=(y*16+x)*4;
+      im.data[i]=c[0];im.data[i+1]=c[1];im.data[i+2]=c[2];im.data[i+3]=c.length>3?c[3]:255; }
+    g.putImageData(im,(t%4)*16,(t>>2)*16); }
+  const v=(c,n,a)=>[c[0]+n*a,c[1]+n*a,c[2]+n*a];
+  const dirt=(x,y,n)=>v([134,96,67],n-.5,34);
+  const grass=(x,y,n)=>v([92,160,58],n-.5,36);
+  tile(0,grass);
+  tile(1,(x,y,n)=> y<3+((x*7+3)%3===0?1:0)? grass(x,y,n):dirt(x,y,n));
+  tile(2,dirt);
+  tile(3,(x,y,n)=>v([128,128,130],(n-.5)+(((x>>2)+(y>>1))%3===0?-.25:0),30));
+  tile(4,(x,y,n)=>v([222,208,160],n-.5,20));
+  tile(5,(x,y,n)=>[45+n*20,105+n*25,215+n*25,175]);
+  tile(6,(x,y,n)=>v([104,80,48],(n-.5)*.6+(x%4===0?-.5:0),30));
+  tile(7,(x,y,n)=>{ const d=Math.max(Math.abs(x-7.5),Math.abs(y-7.5))|0; return v(d>=7?[104,80,48]:[176,142,88],(d%2?-.4:0)+(n-.5)*.4,30); });
+  tile(8,(x,y,n)=>v([50,122,42],n<.22?-1.1:(n-.5),30));
+  tile(9,(x,y,n)=>v([168,134,80],(y%4===3?-.9:0)+((x+(y>>2)*5)%8===0?-.5:0)+(n-.5)*.4,30));
+  tile(10,(x,y,n)=>{ const row=y>>2, m=y%4===3||((x+(row%2)*4)%8===7); return m?v([196,190,180],n-.5,16):v([156,72,56],n-.5,30); });
+  tile(11,(x,y,n)=>{ const e=x===0||y===0||x===15||y===15; const s=(x+y===9||x+y===10)&&x>2&&x<8;
+    return e?[214,236,244,255]:s?[235,248,255,255]:[0,0,0,0]; });
+  tile(12,(x,y,n)=>{ const g=(x%5===0||y%5===0); return g?v([96,70,38],n-.5,24):v([176,142,88],n-.5,30); });
+  tile(13,(x,y,n)=>{ if(x<2||x>13||y<2) return v([104,80,48],n-.5,30); const t=(y>5&&y<8&&x>3&&x<12)||(x>6&&x<9&&y>=8&&y<14); return t?v([62,62,66],n-.5,20):v([150,118,70],n-.5,30); });
+})();
+EX.tiles(atlas.getContext("2d"));
 
-<!-- SIDEBAR -->
-<div id="sidebar" class="sidebar">
-    <div class="close-btn" onclick="toggleSidebar()">✖</div>
-    <h2>Menu Tambahan</h2>
-    <button class="btn-sidebar btn-wa" onclick="window.open('https://wa.me/62895613282875', '_blank')">💬 Chat Admin Asli</button>
-    <button class="btn-sidebar btn-tema" onclick="toggleTema()">🌓 Ganti Mode</button>
-    <div style="margin-top: 20px; background: var(--input-bg); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
-        <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: bold;">Punya Kode Promo?</p>
-        <input type="text" id="input-promo" placeholder="Ketik di sini" style="margin-bottom: 10px;">
-        <button class="btn-cek" style="width: 100%;" onclick="klaimPromo()">Klaim Diskon</button>
-    </div>
-    <div style="margin-top: 15px; background: var(--input-bg); padding: 15px; border-radius: 8px; border: 1px solid #f1c40f;">
-        <p style="margin: 0 0 10px 0; font-size: 12px; font-weight: bold; color: #f1c40f;">Klaim +25 Koin Gacha!</p>
-        <p style="font-size: 10px; margin-top: 0;">Masukkan kode dari Admin setelah bayar.</p>
-        <input type="text" id="input-resi" placeholder="Contoh: ZN-1234" style="margin-bottom: 10px;">
-        <button class="btn-cek" style="width: 100%; color: #f1c40f; border-color: #f1c40f;" onclick="klaimResi()">Klaim Koin</button>
-    </div>
-</div>
+/* ---------- WebGL ---------- */
+const canvas=document.getElementById("c");
+const gl=canvas.getContext("webgl",{alpha:false,antialias:false});
+function shader(type,src){ const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
+  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+function program(vs,fs){ const p=gl.createProgram(); gl.attachShader(p,shader(gl.VERTEX_SHADER,vs)); gl.attachShader(p,shader(gl.FRAGMENT_SHADER,fs));
+  gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p)); return p; }
+let prog,lprog,U={},LU={},chunks=[],lineBuf;
+function initGL(){
+  prog=program(`attribute vec3 aPos;attribute vec2 aUv;attribute float aL;uniform mat4 uM;uniform vec3 uEye;uniform vec2 uFog;
+    varying vec2 vUv;varying float vL;varying float vF;
+    void main(){gl_Position=uM*vec4(aPos,1.0);vUv=aUv;vL=aL;vF=clamp((distance(aPos,uEye)-uFog.x)/(uFog.y-uFog.x),0.0,1.0);}`,
+   `precision mediump float;uniform sampler2D uT;uniform vec3 uSky;uniform float uBr;varying vec2 vUv;varying float vL;varying float vF;
+    void main(){vec4 c=texture2D(uT,vUv);if(c.a<0.1)discard;gl_FragColor=vec4(mix(c.rgb*vL*uBr,uSky,vF),c.a);}`);
+  for(const n of["uM","uEye","uFog","uT","uSky","uBr"]) U[n]=gl.getUniformLocation(prog,n);
+  U.aPos=gl.getAttribLocation(prog,"aPos");U.aUv=gl.getAttribLocation(prog,"aUv");U.aL=gl.getAttribLocation(prog,"aL");
+  lprog=program(`attribute vec3 aPos;uniform mat4 uM;uniform vec3 uO;void main(){gl_Position=uM*vec4(aPos+uO,1.0);}`,
+    `precision mediump float;void main(){gl_FragColor=vec4(0.05,0.05,0.05,1.0);}`);
+  LU.uM=gl.getUniformLocation(lprog,"uM");LU.uO=gl.getUniformLocation(lprog,"uO");LU.aPos=gl.getAttribLocation(lprog,"aPos");
+  const tex=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,tex);
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,atlas);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.NEAREST);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  // kubus garis untuk sorotan
+  const a=-0.003,b=1.003,P=[[a,a,a],[b,a,a],[b,a,b],[a,a,b],[a,b,a],[b,b,a],[b,b,b],[a,b,b]],
+    E=[0,1,1,2,2,3,3,0,4,5,5,6,6,7,7,4,0,4,1,5,2,6,3,7],L=[];
+  for(const e of E) L.push(...P[e]);
+  lineBuf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,lineBuf); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(L),gl.STATIC_DRAW);
+  for(let i=0;i<NCX*NCZ;i++) chunks.push({vbo:gl.createBuffer(),n:0,wvbo:gl.createBuffer(),wn:0,dirty:true,cx:(i%NCX)*CS+8,cz:((i/NCX)|0)*CS+8});
+}
 
-<div class="app-container">
-    <div class="header">
-        <div class="menu-btn" onclick="toggleSidebar()">☰</div>
-        <h1 id="header-title">ZONA TOPUP</h1>
-        <div class="status-badge">🟢 Admin Hanifan Online</div>
-        <div class="game-switcher">
-            <div id="btn-roblox" class="game-btn active" onclick="setGame('roblox')">
-                <img src="4354.png" alt="Roblox" style="height: 20px; object-fit: contain;">
-            </div>
-            <div id="btn-mlbb" class="game-btn" onclick="setGame('mlbb')">
-                <img src="4355.jpg" alt="MLBB" style="height: 20px; object-fit: contain; border-radius: 4px;">
-            </div>
-        </div>
-    </div>
+/* ---------- Meshing ---------- */
+const UV=[[0,1],[0,0],[1,0],[1,1]];
+const FACES=[
+ {n:[1,0,0],c:[[1,0,0],[1,1,0],[1,1,1],[1,0,1]],s:.8,t:1},
+ {n:[-1,0,0],c:[[0,0,1],[0,1,1],[0,1,0],[0,0,0]],s:.8,t:1},
+ {n:[0,1,0],c:[[0,1,1],[1,1,1],[1,1,0],[0,1,0]],s:1,t:0},
+ {n:[0,-1,0],c:[[0,0,0],[1,0,0],[1,0,1],[0,0,1]],s:.55,t:2},
+ {n:[0,0,1],c:[[1,0,1],[1,1,1],[0,1,1],[0,0,1]],s:.66,t:1},
+ {n:[0,0,-1],c:[[0,0,0],[0,1,0],[1,1,0],[1,0,0]],s:.66,t:1}];
+for(const f of FACES){ f.ao=f.c.map(c=>{ const d=[0,1,2].map(k=>f.n[k]?0:c[k]*2-1), ax=[0,1,2].filter(k=>!f.n[k]);
+  const s1=f.n.slice(),s2=f.n.slice(),cn=f.n.slice(); s1[ax[0]]+=d[ax[0]]; s2[ax[1]]+=d[ax[1]]; cn[ax[0]]+=d[ax[0]]; cn[ax[1]]+=d[ax[1]];
+  return [s1,s2,cn]; }); }
+const occ=(x,y,z)=>{ const b=get(x,y,z); return b!==AIR&&b!==WATER&&b!==GLASS?1:0; };
+function showFace(id,n){ if(n===AIR) return true; if(n>=30) return id!==WATER; if(id===WATER) return false; if(n===WATER) return true; if(n===GLASS) return id!==GLASS; return false; }
+const QA=[0,1,2,0,2,3],QB=[1,2,3,1,3,0],lt=[0,0,0,0];
+function buildChunk(ci){
+  const ch=chunks[ci],cx=(ci%NCX)*CS,cz=((ci/NCX)|0)*CS,o=[],w=[];
+  for(let y=0;y<H;y++)for(let z=cz;z<cz+CS;z++)for(let x=cx;x<cx+CS;x++){
+    const id=blocks[(y*D+z)*W+x]; if(id===AIR) continue;
+    if(id>=30){ EX.partial(o,id,x,y,z); continue; }
+    const isW=id===WATER, out=isW?w:o, drop=isW&&get(x,y+1,z)!==WATER?0.12:0;
+    for(let fi=0;fi<6;fi++){ const f=FACES[fi],n=f.n;
+      if(!showFace(id,get(x+n[0],y+n[1],z+n[2]))) continue;
+      const t=TILES[id][f.t],tx=t%4,ty=t>>2;
+      for(let i=0;i<4;i++){ if(isW){lt[i]=f.s;continue;}
+        const a=f.ao[i],s1=occ(x+a[0][0],y+a[0][1],z+a[0][2]),s2=occ(x+a[1][0],y+a[1][1],z+a[1][2]);
+        const ao=s1&&s2?0:3-s1-s2-occ(x+a[2][0],y+a[2][1],z+a[2][2]);
+        lt[i]=f.s*(0.5+ao/6); }
+      const q=lt[0]+lt[2]<lt[1]+lt[3]?QB:QA;
+      for(let k=0;k<6;k++){ const i=q[k],c=f.c[i];
+        out.push(x+c[0],y+c[1]-(c[1]?drop:0),z+c[2],(tx+0.01+UV[i][0]*0.98)/4,(ty+0.01+UV[i][1]*0.98)/16,lt[i]); }
+    }
+  }
+  gl.bindBuffer(gl.ARRAY_BUFFER,ch.vbo); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(o),gl.DYNAMIC_DRAW); ch.n=o.length/6;
+  gl.bindBuffer(gl.ARRAY_BUFFER,ch.wvbo); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(w),gl.DYNAMIC_DRAW); ch.wn=w.length/6;
+  ch.dirty=false;
+}
+function markDirty(x,z){ for(let dz=-1;dz<=1;dz++)for(let dx=-1;dx<=1;dx++){ const X=x+dx,Z=z+dz;
+  if(X<0||Z<0||X>=W||Z>=D) continue; chunks[((Z/CS)|0)*NCX+((X/CS)|0)].dirty=true; } }
+function setBlock(x,y,z,id){ if(x<0||z<0||x>=W||z>=D||y<0||y>=H) return; const i=idx(x,y,z); const old=blocks[i]; blocks[i]=id; edits[i]=id; markDirty(x,z); save(); EX.onBlock(old,id,x,y,z); }
 
-    <!-- TAB BERANDA -->
-    <div id="tab-beranda" class="tab-content active">
-        <div class="section-card">
-            <div class="section-title">Pesanan Terbaru 🚀 <span style="font-size:10px; color:var(--primary);">🔴 Live</span></div>
-            <div id="testi-container" class="scroll-box"></div>
-        </div>
-        
-        <!-- GRID KOTAK 1 & 2 (SULTAN & ULASAN BERSEBELAHAN) -->
-        <div class="grid-2-col">
-            <!-- Kotak 1: Top Sultan -->
-            <div class="section-card" style="margin-bottom: 0;">
-                <div class="section-title" id="title-leaderboard" style="font-size: 13px;">👑 Top 5 Sultan</div>
-                <div id="leaderboard-container"></div>
-            </div>
+/* ---------- Pemain ---------- */
+const R=0.3,PH=1.8,EYE=1.62;
+const P={x:W/2+.5,y:30,z:D/2+.5,vx:0,vy:0,vz:0,yaw:0,pitch:-0.2,ground:false};
+const input={fx:0,fz:0,jump:false,keys:{}};
+let isTouch=("ontouchstart" in window)||navigator.maxTouchPoints>0, started=false, sel=0, target=null;
+function hits(x,y,z){ const x0=Math.floor(x-R),x1=Math.floor(x+R),y0=Math.floor(y),y1=Math.floor(y+PH),z0=Math.floor(z-R),z1=Math.floor(z+R);
+  for(let j=y0;j<=y1;j++)for(let k=z0;k<=z1;k++)for(let i=x0;i<=x1;i++) if(solid(i,j,k)&&(get(i,j,k)<30||EX.pHit(i,j,k,x,y,z,R,PH))) return true; return false; }
+function spawn(){
+  let bx=W>>1,bz=D>>1,found=false;
+  for(let r=0;r<56&&!found;r++)for(let dz=-r;dz<=r&&!found;dz++)for(let dx=-r;dx<=r;dx++){
+    if(Math.max(Math.abs(dx),Math.abs(dz))!==r) continue;
+    if(hm[(bz+dz)*W+bx+dx]>SEA+1){ bx+=dx;bz+=dz;found=true;break; } }
+  let y=H-1; while(y>0&&!solid(bx,y,bz)) y--;
+  P.x=bx+.5;P.z=bz+.5;P.y=y+1.01;P.vx=P.vy=P.vz=0;
+}
+function physics(dt){
+  let f=0,s=0;
+  if(started){ f=-input.fz; s=input.fx; const k=input.keys;
+    if(k.KeyW||k.ArrowUp) f+=1; if(k.KeyS||k.ArrowDown) f-=1; if(k.KeyD||k.ArrowRight) s+=1; if(k.KeyA||k.ArrowLeft) s-=1; }
+  const m=Math.hypot(f,s); if(m>1){f/=m;s/=m;}
+  const inWater=get(Math.floor(P.x),Math.floor(P.y+0.5),Math.floor(P.z))===WATER;
+  const sp=EX.flying?9:inWater?2.6:4.6, sy=Math.sin(P.yaw), cy=Math.cos(P.yaw);
+  const tx=(-sy*f+cy*s)*sp, tz=(-cy*f-sy*s)*sp, a=Math.min(1,dt*(P.ground||inWater?14:5));
+  P.vx+=(tx-P.vx)*a; P.vz+=(tz-P.vz)*a;
+  const jump=started&&(input.jump||input.keys.Space); if(EX.flying){ const dn=(input.down||input.keys.ShiftLeft)?1:0; P.vy+=(((jump?1:0)-dn)*7-P.vy)*Math.min(1,dt*8); } else
+  if(inWater){ P.vy-=7*dt; if(P.vy<-3)P.vy=-3; if(jump)P.vy=3.2; }
+  else { P.vy-=26*dt; if(P.vy<-34)P.vy=-34; if(jump&&P.ground)P.vy=8.3; }
+  let dx=P.vx*dt,dy=P.vy*dt,dz=P.vz*dt;
+  const n=Math.max(1,Math.ceil(Math.max(Math.abs(dx),Math.abs(dy),Math.abs(dz))/0.4)); dx/=n;dy/=n;dz/=n;
+  let blocked=false; P.ground=false;
+  for(let i=0;i<n;i++){
+    let nx=P.x+dx; if(hits(nx,P.y,P.z)){ nx=EX.slide(P.x,nx,t=>hits(t,P.y,P.z)); P.vx=0;blocked=true; } P.x=nx;
+    let nz=P.z+dz; if(hits(P.x,P.y,nz)){ nz=EX.slide(P.z,nz,t=>hits(P.x,P.y,t)); P.vz=0;blocked=true; } P.z=nz;
+    let ny=P.y+dy; if(hits(P.x,ny,P.z)){ if(dy<0)P.ground=true; ny=EX.slide(P.y,ny,t=>hits(P.x,t,P.z)); P.vy=0; dy=0; } P.y=ny;
+  }
+  if(isTouch&&blocked&&P.ground&&m>0.2) P.vy=8.3; // lompat otomatis di HP
+  if(hits(P.x,P.y,P.z)) P.y+=1; // jaga-jaga bila terjepit
+}
 
-            <!-- Kotak 2: Ulasan Pelanggan -->
-            <div class="section-card" style="margin-bottom: 0; border-color: #f1c40f;">
-                <div class="section-title" style="color: #f1c40f; font-size: 13px;">⭐ Ulasan (4.9/5)</div>
-                <div style="font-size: 10px; margin-bottom: 10px; background: var(--input-bg); padding: 8px; border-radius: 6px;">
-                    <div id="stat-s5" style="color: #f1c40f;">⭐⭐⭐⭐⭐ 5 (487)</div>
-                    <div id="stat-s3" style="color: #f39c12;">⭐⭐⭐ 3 (10)</div>
-                    <div id="stat-s1" style="color: #e74c3c;">⭐ 1 (3)</div>
-                </div>
-                <div id="review-list" class="scroll-box" style="max-height: 120px; margin-bottom: 10px; border-top: 1px solid var(--border-color); padding-top: 10px;">
-                    <!-- Komen JS masuk sini -->
-                </div>
-                <select id="input-star" style="width: 100%; padding: 5px; font-size: 10px; margin-bottom: 5px; background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 5px;">
-                    <option value="5">⭐⭐⭐⭐⭐ Puas</option>
-                    <option value="1">⭐ Kecewa</option>
-                </select>
-                <input type="text" id="input-komen" placeholder="Tulis..." style="padding: 6px; font-size: 11px; margin-bottom: 5px;">
-                <button class="btn-cek" style="width: 100%; padding: 6px; font-size: 11px;" onclick="tambahKomen()">Kirim</button>
-            </div>
-        </div>
+/* ---------- Bidik blok ---------- */
+function lookDir(){ const cp=Math.cos(P.pitch); return [-Math.sin(P.yaw)*cp,Math.sin(P.pitch),-Math.cos(P.yaw)*cp]; }
+function raycast(o,d,max){
+  let x=Math.floor(o[0]),y=Math.floor(o[1]),z=Math.floor(o[2]),px=x,py=y,pz=z,t=0;
+  const sx=d[0]>0?1:-1,sy=d[1]>0?1:-1,sz=d[2]>0?1:-1;
+  const tdx=d[0]?Math.abs(1/d[0]):Infinity,tdy=d[1]?Math.abs(1/d[1]):Infinity,tdz=d[2]?Math.abs(1/d[2]):Infinity;
+  let mx=d[0]?(d[0]>0?x+1-o[0]:o[0]-x)*tdx:Infinity,my=d[1]?(d[1]>0?y+1-o[1]:o[1]-y)*tdy:Infinity,mz=d[2]?(d[2]>0?z+1-o[2]:o[2]-z)*tdz:Infinity;
+  while(t<=max){
+    const b=get(x,y,z); if(b!==AIR&&b!==WATER&&y>=0) return {x,y,z,px,py,pz};
+    px=x;py=y;pz=z;
+    if(mx<my&&mx<mz){x+=sx;t=mx;mx+=tdx;} else if(my<mz){y+=sy;t=my;my+=tdy;} else {z+=sz;t=mz;mz+=tdz;}
+  }
+  return null;
+}
+function doBreak(){ if(!started||!target||target.y===0) return; const {x,y,z}=target;
+  const wet=get(x,y+1,z)===WATER||get(x+1,y,z)===WATER||get(x-1,y,z)===WATER||get(x,y,z+1)===WATER||get(x,y,z-1)===WATER;
+  setBlock(x,y,z,wet?WATER:AIR); }
+function doPlace(){ if(!started) return; if(EX.useBlock()) return; if(!target) return; const x=target.px,y=target.py,z=target.pz;
+  if(y<0||y>=H||x<0||z<0||x>=W||z>=D) return; const cur=get(x,y,z); if(cur!==AIR&&cur!==WATER) return;
+  if(x+1>P.x-R&&x<P.x+R&&z+1>P.z-R&&z<P.z+R&&y+1>P.y&&y<P.y+PH) return; // jangan menimpa pemain
+  const it=HOTBAR[sel]; if(!it||!EX.canPlace(it)) return; setBlock(x,y,z,EX.blockOf(it)); EX.placed(it); }
 
-        <!-- FITUR FAQ DI BAWAHNYA -->
-        <div class="section-card" style="margin-top: 15px;">
-            <div class="section-title">❓ Pertanyaan Sering Diajukan</div>
-            <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question">Apakah akun dijamin aman dari banned? <span>+</span></div>
-                <div class="faq-answer">100% Aman Bos! Kita menggunakan sistem transfer via Gamepass resmi yang dipantau langsung oleh sistem keamanan Roblox.</div>
-            </div>
-            <div class="faq-item" onclick="toggleFaq(this)">
-                <div class="faq-question">Kenapa WDP di sini bisa lebih murah? <span>+</span></div>
-                <div class="faq-answer">Karena Zona Topup mengambil margin keuntungan yang tipis agar pelanggan setia bisa gacha tanpa bikin dompet jebol!</div>
-            </div>
-        </div>
-    </div>
+/* ---------- Render ---------- */
+function mul(a,b){ const o=new Float32Array(16); for(let c=0;c<4;c++)for(let r=0;r<4;r++)
+  o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3]; return o; }
+function resize(){ const dpr=Math.min(window.devicePixelRatio||1,1.5),w=Math.round(innerWidth*dpr),h=Math.round(innerHeight*dpr);
+  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;} }
+function render(){
+  resize(); gl.viewport(0,0,canvas.width,canvas.height);
+  EX.rebuild();
+  const ex=P.x,ey=P.y+EYE,ez=P.z, [vx,vy,vz]=EX.cam(), under=get(Math.floor(ex),Math.floor(ey),Math.floor(ez))===WATER;
+  const sky=under?[0.1*DAY.br,0.27*DAY.br,0.55*DAY.br]:DAY.sky;
+  gl.clearColor(sky[0],sky[1],sky[2],1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  const f=1/Math.tan(70*Math.PI/360),asp=canvas.width/canvas.height,nr=0.08,fr=220;
+  const pr=[f/asp,0,0,0, 0,f,0,0, 0,0,(fr+nr)/(nr-fr),-1, 0,0,2*fr*nr/(nr-fr),0];
+  const cp=Math.cos(-P.pitch),sp=Math.sin(-P.pitch),cy=Math.cos(-P.yaw),sy=Math.sin(-P.yaw);
+  const rx=[1,0,0,0, 0,cp,sp,0, 0,-sp,cp,0, 0,0,0,1], ry=[cy,0,-sy,0, 0,1,0,0, sy,0,cy,0, 0,0,0,1], tr=[1,0,0,0, 0,1,0,0, 0,0,1,0, -vx,-vy,-vz,1];
+  const M=mul(pr,mul(rx,mul(ry,tr)));
+  gl.useProgram(prog); gl.uniformMatrix4fv(U.uM,false,M); gl.uniform3f(U.uEye,vx,vy,vz);
+  gl.uniform2f(U.uFog,under?1:46*DAY.fog,under?16:92*DAY.fog); gl.uniform3f(U.uSky,sky[0],sky[1],sky[2]); gl.uniform1i(U.uT,0); gl.uniform1f(U.uBr,DAY.br);
+  gl.enableVertexAttribArray(U.aPos);gl.enableVertexAttribArray(U.aUv);gl.enableVertexAttribArray(U.aL);
+  const bind=b=>{ gl.bindBuffer(gl.ARRAY_BUFFER,b); gl.vertexAttribPointer(U.aPos,3,gl.FLOAT,false,24,0);
+    gl.vertexAttribPointer(U.aUv,2,gl.FLOAT,false,24,12); gl.vertexAttribPointer(U.aL,1,gl.FLOAT,false,24,20); };
+  gl.enable(gl.DEPTH_TEST); gl.enable(gl.CULL_FACE); gl.disable(gl.BLEND); gl.depthMask(true);
+  for(const c of chunks) if(c.n&&EX.near(c)){ bind(c.vbo); gl.drawArrays(gl.TRIANGLES,0,c.n); }
+  EX.drawMobs(M,sky);
+  // sorotan blok
+  target=raycast([ex,ey,ez],lookDir(),6);
+  if(target){ gl.useProgram(lprog); gl.uniformMatrix4fv(LU.uM,false,M); gl.uniform3f(LU.uO,target.x,target.y,target.z);
+    gl.bindBuffer(gl.ARRAY_BUFFER,lineBuf); gl.enableVertexAttribArray(LU.aPos); gl.vertexAttribPointer(LU.aPos,3,gl.FLOAT,false,0,0);
+    gl.drawArrays(gl.LINES,0,24); gl.useProgram(prog); }
+  // air (tembus pandang)
+  gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA); gl.disable(gl.CULL_FACE); gl.depthMask(false);
+  for(const c of chunks) if(c.wn&&EX.near(c)){ bind(c.wvbo); gl.drawArrays(gl.TRIANGLES,0,c.wn); }
+  gl.depthMask(true);
+}
+let last=0;
+function frame(t){ const dt=Math.min(0.05,(t-last)/1000||0.016); last=t; EX.pre(); physics(dt); EX.update(dt); render(); requestAnimationFrame(frame); }
 
-    <!-- TAB TOPUP -->
-    <div id="tab-topup" class="tab-content" style="display: none;">
-        <!-- BAGIAN ROBLOX -->
-        <div id="topup-roblox">
-            <div class="section-card">
-                <div class="section-title">Detail User Roblox</div>
-                <div class="input-group">
-                    <input type="text" id="username-rbx" placeholder="Masukkan Username Roblox">
-                    <button class="btn-cek" onclick="cekProfilRbx()">Cek PP</button>
-                </div>
-                <div id="profil-preview" style="display:none; text-align:center; margin-top:10px; background:var(--input-bg); padding:10px; border-radius:8px; border:1px dashed var(--primary);">
-                    <img id="img-pp-rbx" src="" style="width:60px; height:60px; border-radius:50%; border:2px solid var(--primary); background:#fff;">
-                    <p id="nama-pp-rbx" style="font-size:12px; margin-top:5px; margin-bottom:0; font-weight:bold;"></p>
-                </div>
-            </div>
+/* ---------- UI & kontrol ---------- */
+const $=id=>document.getElementById(id);
+function buildHotbar(){ const hb=$("hotbar"); hb.innerHTML="";
+  HOTBAR.forEach((id,i)=>{ const s=document.createElement("div"); s.className="slot"+(i===sel?" sel":"");
+    const c=document.createElement("canvas"); c.width=c.height=16; const t=TILES[id][1];
+    c.getContext("2d").drawImage(atlas,(t%4)*16,(t>>2)*16,16,16,0,0,16,16); s.appendChild(c);
+    const pick=e=>{e.preventDefault();e.stopPropagation();select(i);}; s.addEventListener("touchstart",pick,{passive:false}); s.addEventListener("mousedown",pick);
+    hb.appendChild(s); }); }
+function select(i){ sel=(i+HOTBAR.length)%HOTBAR.length; [...$("hotbar").children].forEach((s,k)=>s.classList.toggle("sel",k===sel)); EX.onSelect(); }
+const SENS_T=0.0055,SENS_M=0.0025;
+function turn(dx,dy,s){ P.yaw-=dx*s; P.pitch=Math.max(-1.55,Math.min(1.55,P.pitch-dy*s)); }
+// sentuh: geser layar untuk melihat
+let lookId=null,lx=0,ly=0;
+canvas.addEventListener("touchstart",e=>{ e.preventDefault(); if(lookId===null){const t=e.changedTouches[0];lookId=t.identifier;lx=t.clientX;ly=t.clientY;} },{passive:false});
+canvas.addEventListener("touchmove",e=>{ e.preventDefault(); for(const t of e.changedTouches) if(t.identifier===lookId){ turn(t.clientX-lx,t.clientY-ly,SENS_T); lx=t.clientX;ly=t.clientY; } },{passive:false});
+const endLook=e=>{ for(const t of e.changedTouches) if(t.identifier===lookId) lookId=null; };
+canvas.addEventListener("touchend",endLook); canvas.addEventListener("touchcancel",endLook);
+// joystick
+const joy=$("joy"),knob=$("knob"); let joyId=null;
+function joyMove(t){ const r=joy.getBoundingClientRect(); let x=(t.clientX-r.left-60)/50,y=(t.clientY-r.top-60)/50; const m=Math.hypot(x,y); if(m>1){x/=m;y/=m;}
+  input.fx=x;input.fz=y; knob.style.transform=`translate(${x*38}px,${y*38}px)`; }
+joy.addEventListener("touchstart",e=>{ e.preventDefault();e.stopPropagation(); const t=e.changedTouches[0]; joyId=t.identifier; joyMove(t); },{passive:false});
+joy.addEventListener("touchmove",e=>{ e.preventDefault(); for(const t of e.changedTouches) if(t.identifier===joyId) joyMove(t); },{passive:false});
+const joyEnd=e=>{ for(const t of e.changedTouches) if(t.identifier===joyId){ joyId=null;input.fx=input.fz=0;knob.style.transform=""; } };
+joy.addEventListener("touchend",joyEnd); joy.addEventListener("touchcancel",joyEnd);
+// tombol tahan
+function holdBtn(el,down,up,repeat){ let iv=0;
+  const st=e=>{ e.preventDefault();e.stopPropagation(); el.classList.add("on"); down(); if(repeat){clearInterval(iv);iv=setInterval(down,230);} };
+  const en=e=>{ e.preventDefault(); el.classList.remove("on"); clearInterval(iv); if(up)up(); };
+  el.addEventListener("touchstart",st,{passive:false}); el.addEventListener("touchend",en); el.addEventListener("touchcancel",en); }
+holdBtn($("bJump"),()=>input.jump=true,()=>input.jump=false,false);
+holdBtn($("bBreak"),()=>EX.mineDown(),()=>EX.mineUp(),false);
+holdBtn($("bPlace"),doPlace,null,true);
+// desktop
+const locked=()=>document.pointerLockElement===canvas;
+function lock(){ try{ const p=canvas.requestPointerLock(); if(p&&p.catch)p.catch(()=>{}); }catch(e){} }
+canvas.addEventListener("mousedown",e=>{ if(isTouch&&!locked()&&e.sourceCapabilities&&e.sourceCapabilities.firesTouchEvents) return;
+  if(!locked()){ lock(); return; } if(e.button===0) EX.leftDown(); else if(e.button===2) doPlace(); });
+canvas.addEventListener("contextmenu",e=>e.preventDefault());
+document.addEventListener("mousemove",e=>{ if(locked()) turn(e.movementX,e.movementY,SENS_M); });
+addEventListener("keydown",e=>{ input.keys[e.code]=true; if(e.code==="Space"||e.code.startsWith("Arrow")) e.preventDefault();
+  if(/^Digit[1-9]$/.test(e.code)) select(+e.code[5]-1); });
+addEventListener("keyup",e=>{ input.keys[e.code]=false; });
+addEventListener("wheel",e=>{ if(started) select(sel+(e.deltaY>0?1:-1)); },{passive:true});
+addEventListener("blur",()=>{ input.keys={}; });
+document.addEventListener("touchmove",e=>e.preventDefault(),{passive:false});
+// menu
+$("help").innerHTML=isTouch?
+  "<li>Tuas kiri: berjalan</li><li>Geser layar: melihat sekeliling</li><li><b>Hancur</b> / <b>Pasang</b>: blok di tanda +</li><li>Ketuk kotak di bawah untuk memilih blok</li>":
+  "<li>WASD: berjalan, Spasi: lompat</li><li>Mouse: melihat (klik untuk mengunci)</li><li>Klik kiri: hancurkan, klik kanan: pasang</li><li>1–9 atau scroll: pilih blok</li>";
+$("play").addEventListener("click",()=>{ $("start").classList.add("hide"); started=true; if(!isTouch) lock(); });
+$("menuBtn").addEventListener("click",()=>{ started=false; input.fx=input.fz=0; if(document.exitPointerLock) document.exitPointerLock();
+  $("play").textContent="Lanjut"; $("newWorld").classList.remove("hide"); $("newWorld").textContent="Dunia baru"; armed=false; $("start").classList.remove("hide"); });
+let armed=false;
+$("newWorld").addEventListener("click",()=>{ if(!armed){ armed=true; $("newWorld").textContent="Yakin? Bangunan akan hilang — ketuk lagi"; return; }
+  armed=false; seed=(Math.random()*90000|0)+1; edits={}; save(); generate(); chunks.forEach(c=>c.dirty=true); spawn(); EX.newWorld(); $("newWorld").textContent="Dunia baru dibuat ✓"; });
 
-            <div class="section-card">
-                <div class="section-title">Pilihan Robux <span class="badge-ready">✔ READY</span></div>
-                <div class="grid-paket">
-                    <div class="paket-card" onclick="pilihPaket('rbx', '100 Robux', 15000, this, 100)">
-                        <div class="tag-diskon">PROMO</div>
-                        <div class="paket-nama">💎 100 Robux</div>
-                        <div class="paket-harga-asli"><s style="color:#ff3b30; font-size:11px;">Rp 19.000</s><br>Rp 15.000</div>
-                    </div>
-                    <div class="paket-card" onclick="pilihPaket('rbx', '500 Robux', 75000, this, 500)">
-                        <div class="tag-diskon">HOT</div>
-                        <div class="paket-nama">💎 500 Robux</div>
-                        <div class="paket-harga-asli">Rp 75.000</div>
-                    </div>
-                </div>
-                <div style="margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px;">
-                    <p style="font-size: 12px; margin-top: 0; margin-bottom: 5px; color: #aaa;">Beli Nominal Lain (Ketik Manual):</p>
-                    <div class="input-group">
-                        <input type="number" id="input-robux-manual" placeholder="Contoh: 150 Robux">
-                        <button class="btn-cek" onclick="hitungManual()">Hitung</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section-card">
-                <div class="section-title">Link Gamepass</div>
-                <input type="text" id="link-rbx" placeholder="Tempel Link Gamepass di sini">
-            </div>
-        </div>
-
-        <!-- BAGIAN MLBB -->
-        <div id="topup-mlbb" style="display: none;">
-            <div class="info-box" style="display: block; border-color: #00cec9; background: rgba(0, 206, 201, 0.1); margin-bottom: 15px;">
-                💡 INFO: Harga 1x WDP asli di aplikasi adalah <b style="text-decoration: line-through; color: #ff3b30;">Rp 36.053</b>.
-            </div>
-            <div class="section-card">
-                <div class="section-title">Detail Akun MLBB</div>
-                <div class="input-group">
-                    <input type="number" id="userid-mlbb" placeholder="User ID">
-                    <input type="number" id="zoneid-mlbb" placeholder="Zone ID" style="width: 40%;">
-                </div>
-            </div>
-            <div class="section-card">
-                <div class="section-title">Pilihan WDP <span class="badge-ready">✔ READY</span></div>
-                <div class="grid-paket">
-                    <div class="paket-card" onclick="pilihPaket('ml', '1x WDP', 30000, this, 0)"><div class="tag-diskon">PROMO</div><div class="paket-nama">🎟️ 1x WDP</div><div class="paket-harga-asli">Rp 30.000</div></div>
-                    <div class="paket-card" onclick="pilihPaket('ml', '3x WDP', 86000, this, 0)"><div class="tag-diskon">SULTAN</div><div class="paket-nama">🎟️ 3x WDP</div><div class="paket-harga-asli">Rp 86.000</div></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- TOTAL BAYAR GLOBAL DENGAN GARANSI -->
-        <div class="section-card" id="infoPajak-card" style="display:none; border-color: var(--primary); background: var(--bg-card); box-shadow: 0 0 15px rgba(46, 204, 113, 0.2);">
-            <div style="font-size:14px; font-weight:bold; margin-bottom:5px;">💰 Total Pembayaran:</div>
-            <div id="hargaRupiah" style="font-size:24px; font-weight:900; color:var(--primary); margin-bottom:10px;">Rp 0</div>
-            
-            <div id="detail-item-pilihan" style="font-size: 13px; color:#ddd; background:var(--input-bg); padding:10px; border-radius:8px; line-height:1.5;">Belum ada item dipilih</div>
-            
-            <div id="box-pakai-voucher" style="display:none; margin-top: 15px;">
-                <button class="btn-cek" onclick="pakaiVoucher()" style="width:100%; border:1px solid #e74c3c; color:#e74c3c;">🎫 Pakai 1 Voucher (-10%)</button>
-            </div>
-
-            <!-- LOGO GARANSI -->
-            <div style="text-align: center; margin-top: 20px; margin-bottom: 5px;">
-                <span style="background: rgba(46, 204, 113, 0.1); color: var(--primary); padding: 5px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid var(--primary);">
-                    🛡️ 100% Garansi Uang Kembali Jika Gagal
-                </span>
-            </div>
-
-            <button class="btn-beli" style="margin-top:10px; font-size:18px;" onclick="pesanWaGlobal()">🛒 Pesan via WhatsApp</button>
-        </div>
-        
-        <!-- BANNER METODE PEMBAYARAN -->
-        <div style="text-align: center; margin-top: 20px; padding: 10px; border-top: 1px dashed var(--border-color);">
-            <p style="font-size: 10px; color: #777; margin-bottom: 8px;">Metode Pembayaran Terverifikasi:</p>
-            <div style="display: flex; justify-content: center; gap: 10px; font-weight: bold; font-size: 12px; color: #555;">
-                <span>QRIS</span> | <span>DANA</span> | <span>GOPAY</span> | <span>OVO</span> | <span>BCA</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- TAB ARCADE GACHA (BARU) -->
-    <div id="tab-arcade" class="tab-content" style="display: none;">
-        <div class="section-card" style="text-align: center; border-color: #ff4757; background: linear-gradient(180deg, #2d3436 0%, #1a201e 100%); position: relative; overflow: hidden;">
-            <h2 style="color: #ff4757; margin-top: 0; text-transform: uppercase; font-weight: 900; letter-spacing: 2px;">🎰 Claw Machine</h2>
-            <p style="font-size: 12px; color: #ccc;">Uji Hoki! Dapatkan Uang Tunai 50RB, Robux, atau Koin.</p>
-            
-            <div style="background: #000; height: 200px; border-radius: 10px; border: 3px solid #ff4757; margin: 15px 0; position: relative; overflow: hidden;" id="gacha-mesin">
-                <!-- Tali dan Capit -->
-                <div id="claw-arm"></div>
-                <div id="claw-hand"></div>
-                
-                <!-- Tumpukan Telur Palsu di bawah -->
-                <div style="position: absolute; bottom: -10px; left: 0; width: 100%; height: 50px; background: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/200%22 width=%2240%22 height=%2240%22><circle cx=%2220%22 cy=%2220%22 r=%2215%22 fill=%22%23ff6b81%22 opacity=%220.6%22/><circle cx=%225%22 cy=%2225%22 r=%2215%22 fill=%22%237bed9f%22 opacity=%220.6%22/><circle cx=%2235%22 cy=%2215%22 r=%2215%22 fill=%22%2370a1ff%22 opacity=%220.6%22/></svg>');"></div>
-
-                <!-- Telur Hasil Gacha yang akan ditarik -->
-                <div id="gacha-egg"></div>
-                <div id="particle-container"></div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px; margin-bottom: 15px;">
-                <div style="font-size: 14px; font-weight: bold;">Saldo Koin: <span id="arcade-koin" style="color: #f1c40f;">0</span></div>
-            </div>
-
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-beli" style="background: #ff4757; color: #fff; font-size: 14px;" onclick="spinGacha(1)">🔘 Main 1x (5 Koin)</button>
-                <button class="btn-beli" style="background: #ff6b81; color: #fff; font-size: 14px;" onclick="spinGacha(10)">🔘 Main 10x (50 Koin)</button>
-            </div>
-        </div>
-
-        <div class="grid-2-col" style="margin-top: 15px;">
-            <div class="section-card" style="text-align: center; border-color: #777; filter: grayscale(100%);">
-                <h4 style="margin: 0 0 5px 0;">🎫 Gosok Hadiah</h4>
-                <p style="font-size: 10px; margin: 0;">Segera Hadir...</p>
-            </div>
-            <div class="section-card" style="text-align: center; border-color: #777; filter: grayscale(100%);">
-                <h4 style="margin: 0 0 5px 0;">🎡 Spin Wheel</h4>
-                <p style="font-size: 10px; margin: 0;">Segera Hadir...</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- TAB TRANSAKSI (History) -->
-    <div id="tab-transaksi" class="tab-content" style="display: none;">
-        <div class="section-card" id="box-tukar-poin" style="display: none; border-color: #f1c40f;">
-            <div class="section-title" style="color: #f1c40f;">🪙 Tukar Poin Manual</div>
-            <p style="font-size: 12px; margin-top: 0;">150 Poin = 10 Robux / 12 Diamond MLBB Gratis</p>
-            <div class="input-group">
-                <input type="number" id="input-tukar-poin" placeholder="Kelipatan 150 poin">
-                <button class="btn-cek" style="color: #f1c40f; border: 1px solid #f1c40f;" onclick="tukarPoin()">Tukar</button>
-            </div>
-        </div>
-        <div class="section-card" style="text-align: center; padding: 40px 20px;">
-            <div style="font-size: 50px; margin-bottom: 10px;">📦</div>
-            <h3 style="margin-bottom: 5px;">Riwayat Transaksi</h3>
-            <p style="font-size: 13px;">Semua pesananmu sedang kami rekap.</p>
-        </div>
-    </div>
-
-    <!-- TAB PROFIL -->
-    <div id="tab-profil" class="tab-content" style="display: none;">
-        <div id="view-belum-login" class="section-card" style="text-align: center; padding: 40px 20px;">
-            <div style="font-size: 50px; margin-bottom: 10px;">👤</div>
-            <h3 style="margin-bottom: 5px;">Kamu Belum Login</h3>
-            <button class="btn-beli" style="margin-top: 20px;" onclick="bukaModalAuth()">Daftar / Login Akun</button>
-        </div>
-
-        <div id="view-sudah-login" class="section-card" style="display: none; text-align: center; padding: 30px 20px;">
-            <div style="display: flex; justify-content: center; margin-bottom: 15px;">
-                <div id="ava-profil-utama" class="ava-warga" style="width: 80px; height: 80px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px;">🙂</div>
-            </div>
-            <h2 id="nama-profil" style="margin: 0; color: var(--primary);">NamaUser</h2>
-            <div id="pangkat-badge" style="display:inline-block; margin-top:5px; padding:3px 10px; border-radius:15px; font-size:12px; font-weight:bold; background:#8B4513; color:#fff;">Warga</div>
-            
-            <div style="display: flex; justify-content: space-between; background: var(--bg-main); padding: 15px; border-radius: 10px; margin-top: 20px; border: 1px solid var(--border-color);">
-                <div><div style="font-size: 12px;">Koin</div><div style="font-weight: bold; color: #f1c40f;" id="text-poin">🪙 0</div></div>
-                <div><div style="font-size: 12px;">Top Up</div><div style="font-weight: bold;" id="text-topup">🛒 0x</div></div>
-                <div><div style="font-size: 12px;">Voucher</div><div style="font-weight: bold; color: #e74c3c;" id="text-voucher">🎫 0</div></div>
-            </div>
-            
-            <button id="btn-panel-admin" class="btn-beli" style="display:none; background:#f1c40f; color:#000; margin-top: 20px;" onclick="document.getElementById('modal-admin').style.display='flex'">⚙️ PANEL ADMIN</button>
-            <button class="btn-beli" style="background: #ff3b30; color: #fff; margin-top: 10px;" onclick="logout()">Logout</button>
-        </div>
-    </div>
-</div>
-
-<!-- FLOATING CS WHATSAPP -->
-<div class="floating-cs" onclick="window.open('https://wa.me/62895613282875', '_blank')">
-    <div class="cs-dot"></div>
-    CS Zona
-</div>
-
-<nav class="bottom-nav">
-    <div class="nav-item active" id="nav-beranda" onclick="switchTab('beranda')"><div class="nav-icon">🏠</div><span>Beranda</span></div>
-    <div class="nav-item" id="nav-topup" onclick="switchTab('topup')"><div class="nav-icon">💎</div><span>Top Up</span></div>
-    <!-- TOMBOL ARCADE DI TENGAH -->
-    <div class="nav-item" id="nav-arcade" onclick="switchTab('arcade')"><div class="nav-icon" style="color:#ff4757;">🎰</div><span style="color:#ff4757;">Arcade</span></div>
-    <div class="nav-item" id="nav-transaksi" onclick="switchTab('transaksi')"><div class="nav-icon">🧾</div><span>Riwayat</span></div>
-    <div class="nav-item" id="nav-profil" onclick="switchTab('profil')"><div class="nav-icon">👤</div><span>Profil</span></div>
-</nav>
-
-<script src="script.js"></script>
+/* ---------- Mulai ---------- */
+try{
+  if(!gl) throw new Error("WebGL tidak tersedia di perangkat ini.");
+  if(isTouch) document.body.classList.add("touch");
+  initGL(); generate(); buildHotbar(); spawn();
+  EX.init();
+  requestAnimationFrame(frame);
+}catch(e){ $("err").textContent="Gagal memulai: "+e.message; $("play").classList.add("hide"); }
+</script>
 </body>
 </html>
