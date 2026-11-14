@@ -919,7 +919,7 @@ function initialBuild(){
 
 /* ---------- Simpan pemain ---------- */
 const PK="dunia-kotak-v3-p";
-function savePlayer(){try{localStorage.setItem(PK,JSON.stringify({seed,mode:S.mode,hp:S.hp,food:S.food,inv:S.inv,order:S.order,hotS:S.hotS,hotC:S.hotC,bed:S.bed,
+function savePlayer(){if(EX2.noSave())return;try{localStorage.setItem(PK,JSON.stringify({seed,mode:S.mode,hp:S.hp,food:S.food,inv:S.inv,order:S.order,hotS:S.hotS,hotC:S.hotC,bed:S.bed,
   furn:[...furn.entries()],tod:DAY.tod,day:DAY.day,pos:[P.x,P.y,P.z],yaw:P.yaw,pitch:P.pitch,snd:S.sound,x2:EX2.save()}));}catch(e){}}
 function loadPlayer(){
   try{const o=JSON.parse(localStorage.getItem(PK)||"null");if(!o)return;

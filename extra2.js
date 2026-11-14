@@ -247,10 +247,10 @@ const FACEN=["Normal","Senyum","Marah","Kaget","Kacamata","Kumis","Mata tutup"];
 const PRESETS=[["Petualang",0,0,0,0,1,0,0],["Ninja",1,4,5,1,0,6,2],["Koboi",2,1,10,4,1,2,5],["Dokter",0,0,6,5,2,0,1],["Koki",1,4,6,5,2,7,5],["Pelaut",0,2,0,5,2,1,1],["Penyihir",0,5,4,1,0,4,0],["Ksatria",1,0,11,1,0,3,2],["Pembalap",2,4,1,1,3,1,4],["Atlet",3,4,7,6,2,0,1],
  ["Bajak laut",1,4,5,6,1,2,5],["Mekanik",2,1,9,4,1,1,0],["Tentara",1,0,2,3,1,3,0],["Sultan",2,4,3,6,5,5,5],["Hantu",5,5,6,5,2,6,6],["Zombie",6,0,9,3,1,2,2],["Robot",7,5,11,1,0,4,4],["Vampir",5,4,5,1,0,0,2],["Anak pantai",1,2,3,7,5,0,1],["Tukang pizza",0,1,1,5,3,1,1]];
 const sc=(c,k)=>[c[0]*k,c[1]*k,c[2]*k];
-function lookCols(L){
+function lookCols(L,na){
   const skin=SKINS[L.skin|0]||SKINS[0];let shirt=SHIRTS[L.shirt|0]||SHIRTS[0],pants=PANTSC[L.pants|0]||PANTSC[0],sleeve=shirt;const ap=A.armorPts();
   if(L.naked){shirt=sleeve=sc(skin,.97);pants=sc(skin,.93);}
-  if(ap>0){const ac=ap>=14?[.78,.8,.84]:ap>=10?[.55,.56,.6]:[.62,.42,.24];shirt=ac;sleeve=ac;pants=sc(ac,.8);}
+  if(ap>0&&!na){const ac=ap>=14?[.78,.8,.84]:ap>=10?[.55,.56,.6]:[.62,.42,.24];shirt=ac;sleeve=ac;pants=sc(ac,.8);}
   return{skin,hair:HAIRS[L.hair|0]||HAIRS[0],shirt,sleeve,pants,shoe:SHOES[L.shoes|0]||SHOES[0]};
 }
 function faceParts(f,skin,hair,hd){
@@ -279,7 +279,7 @@ function hatParts(h,col,hd){
   return[];
 }
 function playerParts(L,opt){
-  const c=lookCols(L),skin=c.skin,hair=c.hair,hd=opt.hd,sk=sc(skin,.85),naked=!!L.naked,T=(p,l)=>{p.limb=l;return p;};
+  const c=lookCols(L,opt.na),skin=c.skin,hair=c.hair,hd=opt.hd,sk=sc(skin,.85),naked=!!L.naked,T=(p,l)=>{p.limb=l;return p;};
   const parts=[B(0,1.62,0,.5,.5,.5,skin,hd),B(0,1.9,0,.54,.12,.54,hair,hd),B(0,1.72,.26,.54,.42,.06,hair,hd),B(-.27,1.8,0,.06,.28,.54,hair,hd),B(.27,1.8,0,.06,.28,.54,hair,hd),B(0,1.84,-.26,.54,.1,.06,hair,hd)];
   parts.push(...faceParts(L.face|0,skin,hair,hd),B(-.26,1.6,0,.03,.1,.1,sk,hd),B(.26,1.6,0,.03,.1,.1,sk,hd),...hatParts(L.hat|0,c.shirt,hd));
   parts.push(B(0,1.35,0,.2,.1,.2,sk),B(0,1.02,0,.54,.68,.28,c.shirt));
@@ -344,6 +344,8 @@ const CSS3=`
 .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}.pgrid button{padding:8px 2px;font-size:12px}
 .opts{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}.opts button{padding:8px 10px;font-size:12px}
 .pgrid button.on,.opts button.on{outline:2px solid #7dff7d}
+#blindx{}
+.inp{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:2px solid #456;background:#0e1824;color:#fff;font-size:15px;margin:6px 0}.bigid{font-size:38px;letter-spacing:6px;text-align:center;font-weight:800;color:#7dff7d;margin:8px 0}
 #wsplats{position:fixed;inset:0;pointer-events:none;z-index:3}
 .ws{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(150,0,0,.85),rgba(120,0,0,.5) 55%,rgba(100,0,0,0) 72%)}
 #blind{position:fixed;top:0;bottom:0;width:46%;pointer-events:none;z-index:3;background:linear-gradient(to right,#000 72%,rgba(0,0,0,0));display:none}
@@ -423,7 +425,7 @@ function initUI(){
   const tbs=$$("tbs"),more=el("button",{id:"tbMore",class:"tb",text:"⋯"}),qb=el("button",{id:"tbQuest",class:"tb sec",text:"📜"},tbs),lb=el("button",{id:"tbLook",class:"tb sec",text:"🎨"},tbs);
   tbs.insertBefore(more,$$("tbCam"));tbs.appendChild(qb);tbs.appendChild(lb);
   tapEl(more,()=>tbs.classList.toggle("open"));
-  makePanel("qp","📜 Misi & Peta");makePanel("ch","📦 Peti");panels.ch.onClose=()=>A.savePlayer();el("div",{id:"wsplats"},b);el("div",{id:"blind"},b);const sb=el("button",{class:"alt",text:"🎨 Desain Skin"});$$("play").insertAdjacentElement("afterend",sb);sb.addEventListener("click",()=>{SFX.click();renderLook();panels.lk.open();});makePanel("lk","🎨 Karakter");makePanel("shp","🏪 Kedai");
+  makePanel("qp","📜 Misi & Peta");makePanel("ch","📦 Peti");makePanel("mpp","🌐 Multiplayer");makePanel("cht","💬 Obrolan");el("p",{id:"mpInfo",style:"display:none;color:#7dff7d;font-weight:700;margin:8px 0"},$$("start").firstElementChild||b);const mb=el("button",{text:"🌐 Multiplayer"});$$("play").insertAdjacentElement("afterend",mb);mb.addEventListener("click",()=>{SFX.click();mpRender();panels.mpp.open();});const cb=el("button",{id:"tbChat",class:"tb sec",text:"💬"},$$("tbs"));cb.addEventListener("click",()=>{if(S.paused)return;renderChat();panels.cht.open();$$("tbs").classList.remove("open");});panels.ch.onClose=()=>A.savePlayer();el("div",{id:"wsplats"},b);el("div",{id:"blind"},b);const sb=el("button",{class:"alt",text:"🎨 Desain Skin"});$$("play").insertAdjacentElement("afterend",sb);sb.addEventListener("click",()=>{SFX.click();renderLook();panels.lk.open();});makePanel("lk","🎨 Karakter");makePanel("shp","🏪 Kedai");
   tapEl(qb,()=>{if(S.paused)return;renderQuests();panels.qp.open();tbs.classList.remove("open");});
   tapEl(lb,()=>{if(S.paused)return;renderLook();panels.lk.open();tbs.classList.remove("open");});
   // gerbang 18+
@@ -610,6 +612,8 @@ function bullet(o,d,g,first){
   if(first||g.pel===1||Math.random()<.35){const sp=170;addP(mp[0],mp[1],mp[2],d[0]*sp,d[1]*sp,d[2]*sp,g.snd==="rail"?.18:.07,g.tc,Math.max(.02,dist/sp),{g:0});}
   if(g.snd==="rail"&&first){for(let k=2;k<dist;k+=2.2)addP(o[0]+d[0]*k,o[1]+d[1]*k-.1,o[2]+d[2]*k,0,0,0,.14,[.5,.8,1],.5,{g:0,fade:.5});}
   const px2=o[0]+d[0]*dist,py2=o[1]+d[1]*dist,pz2=o[2]+d[2]*dist;
+  const pv=MP.on?mpRay(o,d,dist):null;
+  if(pv){mpDmg(pv.pid,g.dmg*(pv.head?2:1),pv.head);bloodAt(pv.x,pv.y,pv.z,5,0,0,2);return;}
   if(mh){
     const m=mh.m,T=TYPES[m.type],hy=o[1]+d[1]*mh.t;
     if(T.head&&hy>m.y+T.h*.76)PEND.head=true;
@@ -684,7 +688,7 @@ function detonate(g){
       burst(x,y+.5,z,30,6,()=>[1,1,1],.1,1.5,{b:.3});explode(x,y,z,2.6,10,0,{byP:true,quiet:true});SFX.cluck(0,1);break;}
   }
 }
-function setAir(x,y,z){const i=idx(x,y,z);blocks[i]=0;edits[i]=0;markDirty(x,z);save();}
+function setAir(x,y,z){const i=idx(x,y,z);blocks[i]=0;edits[i]=0;markDirty(x,z);mpBlock(x,y,z,0);save();}
 function breakBlocks(x,y,z,r){
   let cnt=0;const cols=new Set(),cx=Math.floor(x),cy=Math.floor(y),cz=Math.floor(z);
   for(let dy=-r;dy<=r;dy++)for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){
@@ -692,7 +696,7 @@ function breakBlocks(x,y,z,r){
     const bx=cx+dx,by=cy+dy,bz=cz+dz;if(by<=0||by>=H||bx<1||bz<1||bx>=W-1||bz>=D-1)continue;
     const id=get(bx,by,bz);if(id===AIR||id===WATER||id===19)continue;
     if(id===18){ignite(bx,by,bz,rnd(.3,1));continue;}
-    const i=idx(bx,by,bz);blocks[i]=0;edits[i]=0;cols.add(bx*1000+bz);if(cnt++<14&&Math.random()<.5)addP(bx+.5,by+.5,bz+.5,rnd(-4,4),rnd(2,7),rnd(-4,4),.2,[.45,.35,.25],1.2,{b:.3});
+    const i=idx(bx,by,bz);blocks[i]=0;edits[i]=0;mpBlock(bx,by,bz,0);cols.add(bx*1000+bz);if(cnt++<14&&Math.random()<.5)addP(bx+.5,by+.5,bz+.5,rnd(-4,4),rnd(2,7),rnd(-4,4),.2,[.45,.35,.25],1.2,{b:.3});
   }
   for(const c of cols)markDirty(Math.floor(c/1000),c%1000);if(cols.size)save();
 }
@@ -708,6 +712,7 @@ function explode(x,y,z,r,dmg,br,o){
   }
   const pd=Math.hypot(P.x-x,P.y+.9-y,P.z-z);
   if(pd<rr&&!(DV.m&&DV.m.exploding)){const f=1-pd/rr,L=Math.hypot(P.x-x,P.z-z)||1;P.vx+=(P.x-x)/L*10*f;P.vz+=(P.z-z)/L*10*f;P.vy=Math.max(P.vy,6*f);if(S.mode==="survival")A.hurtPlayer(Math.max(1,Math.round(dmg*.5*f)));if(pd<rr*.7)flashWhite(.4*f+.1);}
+  if(MP.on)for(const k in MP.rp){const r=MP.rp[k];if(r.dead||r.y<-50)continue;const d2=Math.hypot(r.x-x,r.y+.9-y,r.z-z);if(d2<rr)mpDmg(k,Math.max(1,Math.round(dmg*.5*(1-d2/rr))),false);}
   if(br>0)breakBlocks(x,y,z,br);
 }
 /* ================= Creeper ================= */
@@ -938,9 +943,9 @@ function renderWounds(){
   for(const p of w.sp){const d=el("div",{class:"ws",style:"left:"+p[0]+"%;top:"+p[1]+"%;width:"+p[2]+"px;height:"+p[2]+"px"},c);}
   bl.className=w.eye===1?"L on":w.eye===2?"R on":"";
 }
-function hitPlayer(dmg,sx,sz,kind){
+function hitPlayer(dmg,sx,sz,kind,forceR){
   if(S.mode!=="survival"||S.dead)return;const w=X.w,hp0=S.hp,ap=A.armorPts(),big=(kind==="shotgun"||kind==="mini")?1.3:1;
-  let reg=Math.random(),R=reg<.1?"head":reg<.55?"torso":reg<.75?"arm":"leg";
+  let reg=Math.random(),R=forceR||(reg<.1?"head":reg<.55?"torso":reg<.75?"arm":"leg");
   if(R==="head"&&ap>=10&&Math.random()<.5)R="torso";
   if(R==="head"){
     if(Math.random()<.5){
@@ -1215,6 +1220,7 @@ function populate(){
 }
 /* ================= Update per frame ================= */
 function update(dt){
+  mpTick(dt);
   if(S.dead)X.wasDead=true;else if(X.wasDead){X.wasDead=false;resetW();}
   if(typeof started!=="undefined"&&!started)return;
   woundTick(dt);raidTick(dt);
@@ -1249,13 +1255,152 @@ function get_h(p){const g=A.groundY(Math.floor(p.x),Math.floor(p.z));return g<0?
 /* ================= Gambar tambahan ================= */
 function emit(){
   emitParts();
+  for(const k in MP.rp)drawRemote(MP.rp[k]);
   if(!S.third&&!S.dead&&!DV.m)drawHeld();
   for(const g of grens)box(g.x,g.y,g.z,.22,.3,.22,g.gr.col||[.25,.32,.22]);
   for(const p of prim){const fl=Math.floor(p.t*6)%2===0,s=.98+(3-p.t)*.01;box(p.x,p.y+.5,p.z,s,s,s,fl?[1,1,1]:[.85,.12,.08]);}
   const f=X.fish;if(f)box(f.x,f.y+(f.bite>0?-.1:0),f.z,.16,.16,.16,[.95,.15,.1]);
 }
+/* ================= Multiplayer P2P (PeerJS) ================= */
+const MP={on:false,host:false,peer:null,conns:{},code:"",me:"host",name:"Pemain"+ri(10,99),rp:{},started:false,noSave:false,t:0,cfg:null,status:"",log:[],wrapped:false,applying:false};
+const MPCOL=[[.9,.2,.2],[.2,.5,.95],[.95,.8,.2],[.2,.8,.4]];
+const pcount=()=>Object.keys(MP.rp).length+1;
+function loadPeer(cb,fail){
+  if(window.Peer){cb();return;}
+  const srcs=["peerjs.min.js","https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js","https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"];
+  const tryN=i=>{if(i>=srcs.length){if(fail)fail();return;}const sc=document.createElement("script");sc.src=srcs[i];sc.onload=()=>window.Peer?cb():tryN(i+1);sc.onerror=()=>tryN(i+1);document.head.appendChild(sc);};tryN(0);
+}
+function bcast(d,except){for(const k in MP.conns){if(k===except)continue;try{MP.conns[k].send(d);}catch(e){}}}
+function wrapWorld(){
+  if(MP.wrapped)return;MP.wrapped=true;MP.cfg=window.DK_PEER_CFG||null;
+  const sb=setBlock;setBlock=function(x,y,z,id){sb(x,y,z,id);if(MP.on&&!MP.applying)bcast({t:"b",x,y,z,id});};
+  const sv=save;save=function(){if(!MP.noSave)sv();};
+}
+function mpBlock(x,y,z,id){if(MP.on&&!MP.applying)bcast({t:"b",x,y,z,id});}
+function mpStatus(s){MP.status=s;mpRender();}
+function mpLog(m,chat){MP.log.push(m);if(MP.log.length>40)MP.log.shift();chip(m);if(panels.cht&&!panels.cht.p.classList.contains("hide"))renderChat();}
+function newRP(r){return{x:0,y:-99,z:0,tx:undefined,ty:0,tz:0,yaw:0,tyaw:0,pitch:0,held:0,look:r.look||X.look,name:r.name||"Tamu",ph:0,sp:0,col:Object.keys(MP.rp).length+(MP.host?1:0),w:[0,0,0,0],dead:0};}
+function mpHost(){
+  mpStatus("Menghubungkan…");
+  loadPeer(()=>{
+    wrapWorld();
+    const code=Array.from({length:5},()=>"ABCDEFGHJKMNPQRSTUVWXYZ23456789"[ri(0,30)]).join("");
+    const p=new window.Peer("dkotak-"+code,MP.cfg||undefined);MP.peer=p;
+    p.on("open",()=>{MP.on=true;MP.host=true;MP.me="host";MP.code=code;mpRender();mpInfo();});
+    p.on("connection",c=>{
+      if(pcount()>=4){c.on("open",()=>{c.send({t:"full"});setTimeout(()=>c.close(),300);});return;}
+      c.on("open",()=>{MP.conns[c.peer]=c;});
+      c.on("data",d=>onMsg(c,d,c.peer));
+      c.on("close",()=>{delete MP.conns[c.peer];const r=MP.rp[c.peer];delete MP.rp[c.peer];if(r)mpLog(r.name+" keluar");bcast({t:"left",pid:c.peer});mpRender();mpInfo();});
+    });
+    p.on("error",e=>{if(e.type==="unavailable-id")mpHost();else mpStatus("Gagal: "+e.type);});
+  },()=>mpStatus("Gagal memuat PeerJS (butuh internet)"));
+}
+function mpJoin(code){
+  code=(code||"").trim().toUpperCase();if(!code)return;mpStatus("Menyambung…");
+  loadPeer(()=>{
+    wrapWorld();
+    const p=new window.Peer(undefined,MP.cfg||undefined);MP.peer=p;
+    p.on("open",id=>{MP.me=id;const c=p.connect("dkotak-"+code,{reliable:true});
+      const to=setTimeout(()=>mpStatus("Dunia tidak ketemu / koneksi gagal"),15000);
+      c.on("open",()=>{clearTimeout(to);MP.on=true;MP.host=false;MP.code=code;MP.conns.host=c;c.send({t:"hi",name:MP.name,look:X.look});mpRender();mpInfo();});
+      c.on("data",d=>onMsg(c,d,"host"));
+      c.on("close",()=>{mpLog("Host keluar dari dunia");MP.on=false;MP.rp={};mpInfo();mpRender();});
+    });
+    p.on("error",e=>mpStatus("Gagal: "+e.type));
+  },()=>mpStatus("Gagal memuat PeerJS"));
+}
+const startPayload=()=>({t:"start",seed,edits,pos:[P.x,P.y,P.z]});
+function startGame(){const st=$$("start");if(st&&!st.classList.contains("hide"))$$("play").click();}
+function mpStart(){MP.started=true;bcast(startPayload());panels.mpp.close();startGame();}
+function enterWorld(d){
+  MP.noSave=true;MP.started=true;seed=d.seed;edits=d.edits||{};generate();chunks.forEach(c=>{c.dirty=true;});spawn();EX.newWorld();
+  panels.mpp.close();startGame();mpLog("Masuk dunia "+MP.code);
+}
+function onMsg(c,d,from){
+  if(!d||!d.t)return;
+  if(d.t==="hi"){
+    const r=MP.rp[from]=newRP(d);
+    bcast({t:"join",pid:from,name:d.name,look:d.look},from);
+    c.send({t:"roster",list:[{pid:"host",name:MP.name,look:X.look}].concat(Object.keys(MP.rp).filter(k=>k!==from).map(k=>({pid:k,name:MP.rp[k].name,look:MP.rp[k].look})))});
+    if(MP.started)c.send(startPayload());
+    mpLog(d.name+" masuk");mpRender();mpInfo();
+  }else if(d.t==="roster"){for(const r of d.list)if(r.pid!==MP.me)MP.rp[r.pid]=newRP(r);mpRender();mpInfo();}
+  else if(d.t==="join"){if(d.pid!==MP.me){MP.rp[d.pid]=newRP(d);mpLog(d.name+" masuk");}mpRender();mpInfo();}
+  else if(d.t==="left"){const r=MP.rp[d.pid];delete MP.rp[d.pid];if(r)mpLog(r.name+" keluar");mpRender();mpInfo();}
+  else if(d.t==="full"){mpStatus("Dunia penuh (maks 4 pemain)");}
+  else if(d.t==="start"){if(!MP.host)enterWorld(d);}
+  else if(d.t==="p"){const pid=MP.host?from:d.pid,r=MP.rp[pid];if(r){r.tx=d.x;r.ty=d.y;r.tz=d.z;r.tyaw=d.yaw;r.pitch=d.pitch;r.held=d.held;r.look=d.look||r.look;r.w=d.w||r.w;r.dead=d.dead;if(r.y<-50){r.x=d.x;r.y=d.y;r.z=d.z;r.yaw=d.yaw;}}
+    if(MP.host)bcast({t:"p",pid:from,x:d.x,y:d.y,z:d.z,yaw:d.yaw,pitch:d.pitch,held:d.held,look:d.look,w:d.w,dead:d.dead},from);}
+  else if(d.t==="b"){MP.applying=true;setBlock(d.x,d.y,d.z,d.id);MP.applying=false;if(MP.host)bcast(d,from);}
+  else if(d.t==="chat"){mpLog("💬 "+d.n+": "+d.m);if(MP.host)bcast(d,from);}
+  else if(d.t==="msg"){mpLog(d.m);if(MP.host)bcast(d,from);}
+  else if(d.t==="dmg"){if(d.to===MP.me)takeDmg(d);else if(MP.host&&MP.conns[d.to])MP.conns[d.to].send(d);}
+}
+function mpDmg(to,dmg,head){const d={t:"dmg",to,dmg,fx:P.x,fz:P.z,from:MP.name,head:head?1:0};if(MP.host){if(MP.conns[to])MP.conns[to].send(d);}else if(MP.conns.host)MP.conns.host.send(d);}
+function takeDmg(d){
+  if(S.dead||S.mode!=="survival")return;
+  hitPlayer(d.dmg,d.fx,d.fz,"rifle",d.head?"head":null);
+  if(S.dead){const m="💀 "+MP.name+" dibunuh "+d.from;mpLog(m);bcast({t:"msg",m});}
+}
+function mpRay(o,d,maxd){
+  let best=null;
+  for(const k in MP.rp){const r=MP.rp[k];if(r.dead||r.y<-50)continue;
+    const t=(r.x-o[0])*d[0]+(r.y+.9-o[1])*d[1]+(r.z-o[2])*d[2];if(t<.3||t>maxd)continue;
+    const px=o[0]+d[0]*t,py=o[1]+d[1]*t,pz=o[2]+d[2]*t;
+    if(Math.hypot(px-r.x,pz-r.z)<.5&&py>r.y&&py<r.y+1.9&&(!best||t<best.t))best={pid:k,t,head:py>r.y+1.45,x:px,y:py,z:pz};}
+  return best;
+}
+function mpTick(dt){
+  if(!MP.on)return;MP.t+=dt;
+  if(MP.t>=.1){MP.t=0;const w=X.w;bcast({t:"p",pid:MP.me,x:P.x,y:P.y,z:P.z,yaw:P.yaw,pitch:P.pitch,held:A.held(),look:X.look,w:[w.al,w.ar,w.ll,w.lr],dead:S.dead?1:0});}
+  const a=Math.min(1,dt*12);
+  for(const k in MP.rp){const r=MP.rp[k];if(r.tx===undefined)continue;const ox=r.x,oz=r.z;
+    r.x+=(r.tx-r.x)*a;r.y+=(r.ty-r.y)*a;r.z+=(r.tz-r.z)*a;
+    const dy=((r.tyaw-r.yaw+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;r.yaw+=dy*a;
+    r.sp=Math.hypot(r.x-ox,r.z-oz)/Math.max(dt,.001);r.ph+=r.sp*dt*1.6;}
+}
+function drawRemote(r){
+  if(r.tx===undefined||r.dead)return;
+  const lg=Math.sin(r.ph)*.8*Math.min(1,r.sp/3),h=r.held,gun=GUN[h],hr=clamp(r.pitch,-1,1)*.6,ra=gun?1.5+hr*.5:-lg,la=gun&&gun.snd!=="rev"?1.3:lg;
+  const parts=playerParts(r.look||X.look,{hd:{rot:hr,py:1.4},la,ra,lg,na:true}),arm={rot:ra,py:1.38},n0=parts.length;
+  if(gun){const L=.18+gun.len*.036;parts.push(B(.37,.74,-.1-L/2,.08,.13,L,gun.col,arm));}
+  else if(h){const cs=h<100?.22:.14;parts.push(B(.37,.62,-.3,cs,cs,cs,spriteOf(h).avg,arm));}
+  for(let i=n0;i<parts.length;i++)parts[i].limb="ar";
+  parts.push(B(0,2.6,0,.2,.2,.2,MPCOL[(r.col|0)%4]));
+  const m={x:r.x,y:r.y,z:r.z,yaw:r.yaw},w=r.w||[0,0,0,0],lm={al:w[0],ar:w[1],ll:w[2],lr:w[3]};
+  for(const p of parts){if(p.limb&&lm[p.limb])continue;A.emitBox(m,p,0,p.col);}
+}
+function mpRender(){
+  const pn=panels.mpp;if(!pn)return;const b=pn.body;b.innerHTML="";
+  const nm=el("input",{type:"text",value:MP.name,maxlength:12,class:"inp"},b);nm.addEventListener("input",()=>{MP.name=nm.value.trim()||"Pemain";});
+  if(!MP.on){
+    const h=el("button",{text:"🌍 Buat Dunia (jadi host)",style:"width:100%;margin:6px 0"},b);h.addEventListener("click",mpHost);
+    el("div",{class:"qrow",text:"Atau gabung pakai ID dunia"},b);
+    const ci=el("input",{type:"text",placeholder:"ID 5 huruf",maxlength:5,class:"inp",style:"text-transform:uppercase"},b);
+    const j=el("button",{class:"alt",text:"➡ Gabung",style:"width:100%"},b);j.addEventListener("click",()=>mpJoin(ci.value));
+    if(MP.status)el("p",{class:"note",text:MP.status},b);
+  }else{
+    el("div",{class:"bigid",text:MP.code},b);
+    el("p",{class:"note",text:MP.host?"Bagikan ID ini ke temanmu. Maksimal 4 pemain.":"Terhubung ke dunia "+MP.code},b);
+    const cp=el("button",{class:"alt",text:"📋 Salin ID",style:"width:100%;margin-bottom:6px"},b);cp.addEventListener("click",()=>{try{navigator.clipboard.writeText(MP.code);}catch(e){}A.toast("ID disalin");});
+    el("div",{class:"qrow",text:"Pemain ("+pcount()+"/4)"},b);
+    el("p",{class:"note",text:"● "+MP.name+" (kamu)"},b);for(const k in MP.rp)el("p",{class:"note",text:"● "+MP.rp[k].name},b);
+    if(MP.host){const s=el("button",{text:MP.started?"▶ Lanjut main":"▶ Mulai Dunia",style:"width:100%;margin-top:8px"},b);s.addEventListener("click",mpStart);}
+    else el("p",{class:"note",text:MP.started?"Dunia sudah jalan":"Menunggu host memulai…"},b);
+  }
+}
+function mpInfo(){const e=$$("mpInfo");if(!e)return;e.style.display=MP.on?"block":"none";e.textContent="🌐 ID Dunia: "+MP.code+" · "+pcount()+"/4 pemain"+(MP.host?" (kamu host)":"");}
+function renderChat(){
+  const b=panels.cht.body;b.innerHTML="";
+  const lg=el("div",{style:"max-height:34vh;overflow-y:auto;font-size:13px;margin-bottom:8px"},b);for(const m of MP.log)el("div",{text:m,style:"padding:2px 0"},lg);lg.scrollTop=1e5;
+  const ip=el("input",{type:"text",placeholder:MP.on?"Ketik pesan…":"Belum terhubung multiplayer",maxlength:120,class:"inp"},b);
+  const s=el("button",{text:"Kirim",style:"width:100%"},b);
+  const go=()=>{const m=ip.value.trim();if(!m||!MP.on)return;bcast({t:"chat",n:MP.name,m});MP.log.push("💬 "+MP.name+": "+m);ip.value="";renderChat();};
+  s.addEventListener("click",go);ip.addEventListener("keydown",e=>{if(e.key==="Enter")go();});
+}
 function init(){initUI();}
 const crCount=id=>GR[id]?(X.cr[id]||64):0;
-return{crCount,ai,preHurt,blood,kill,use,attack,weapon,driving,update,hudKey,gunInfo,infoExtra,save,load,newWorld,populate,init,tiles,icon,describe,onGive,drawChar,hotExtra,drawPlayer,emit,emitSky,gen,
-  dbg:{hitPlayer,aggro,renderLook,applyPreset,PRESETS,openChest:openChest,W:()=>X.w,X,DV,SHOPS,get BASE(){return BASE;},LOOT,SHELF,GUN,GR,fire,throwG,explode,spawnVeh,mount,dismount,openChest,takeShelf,openShop,feed,fishUse,catchFish,ignite,ptc,grens,VEH,renderShop}};
+return{crCount,ai,preHurt,blood,kill,use,attack,weapon,driving,update,hudKey,gunInfo,infoExtra,save,load,newWorld,populate,init,tiles,icon,describe,onGive,drawChar,hotExtra,drawPlayer,emit,emitSky,gen,noSave:()=>MP.noSave,
+  dbg:{MP,onMsg,mpHost,mpJoin,mpStart,mpRay,hitPlayer,aggro,renderLook,applyPreset,PRESETS,openChest:openChest,W:()=>X.w,X,DV,SHOPS,get BASE(){return BASE;},LOOT,SHELF,GUN,GR,fire,throwG,explode,spawnVeh,mount,dismount,openChest,takeShelf,openShop,feed,fishUse,catchFish,ignite,ptc,grens,VEH,renderShop}};
 })();
