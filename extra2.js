@@ -1384,8 +1384,8 @@ function zPick(){
 }
 function zSpawnTick(dt){
   ZS.t-=dt;ZS.bossT-=dt;const L=A.mobs();let n=0,boss=0;for(const m of L)if(m.cz){n++;if(ZT[m.zt].boss)boss++;}
-  const cap=Math.min(48,16+Math.floor(ZS.kills/5));
-  if(ZS.t<=0){ZS.t=.4;if(n<cap)for(let k=0;k<3;k++){const fa=Math.atan2(-Math.cos(P.yaw),-Math.sin(P.yaw)),a=Math.random()<.75?fa+(Math.random()-.5)*1.7:Math.random()*6.283,d=rnd(12,30);const t=zPick();if(spawnZ(t,P.x+Math.cos(a)*d,P.z+Math.sin(a)*d))break;}}
+  const cap=Math.min(30,10+Math.floor(ZS.kills/6));
+  if(ZS.t<=0){ZS.t=.4;if(n<cap)for(let k=0;k<3;k++){const fa=Math.atan2(-Math.cos(P.yaw),-Math.sin(P.yaw)),a=Math.random()<.75?fa+(Math.random()-.5)*1.7:Math.random()*6.283,d=rnd(24,40);const t=zPick();if(spawnZ(t,P.x+Math.cos(a)*d,P.z+Math.sin(a)*d))break;}}
   if(ZS.bossT<=0&&boss<1){ZS.bossT=rnd(75,110);const t=Math.random()<.5?"raksasa":"ratu";for(let k=0;k<12;k++){const a=Math.random()*6.283;if(spawnZ(t,P.x+Math.cos(a)*34,P.z+Math.sin(a)*34)){chip("☠ "+ZNAME(t)+" muncul!");A.tone("sawtooth",90,50,1.2,.35);break;}}}
 }
 function zBite(m,Z){
@@ -1403,7 +1403,7 @@ function zAI(m,dt,dist,dx,dz){
   const Z=ZT[m.zt],surv=S.mode==="survival"&&!S.dead,k=Z.k||1;m.cd=(m.cd||0)-dt;m.ab=(m.ab===undefined?rnd(1,4):m.ab)-dt;
   if(dist>82&&!Z.boss){const L=A.mobs(),i=L.indexOf(m);if(i>=0)L.splice(i,1);return true;}
   if(!surv){m.moving=false;return true;}
-  m.yaw=Math.atan2(-dx,-dz);m.moving=dist>.95*k;m.sp=Z.sp;
+  m.yaw=Math.atan2(-dx,-dz);m.moving=dist>.95*k&&(dist<34||Z.boss);m.sp=Z.sp;
   const w=Z.w;
   if(m.chg>0){m.chg-=dt;m.sp=Z.sp*2.7;}
   if(w==="spit"||w==="throw"){if(dist>5&&dist<(w==="spit"?20:24)&&m.ab<=0){m.ab=rnd(2.2,3.6);if(w==="spit")zProj(m,"vomit",[.55,.05,.05],3,1);else zProj(m,"rock",[.4,.35,.3],5,0);}if(dist<11)m.moving=false;}

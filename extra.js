@@ -473,7 +473,7 @@ function updateMobs(dt){
     if(m.hurt>0)m.hurt-=dt;if(m.tcd>0)m.tcd-=dt;
     if(EX2.ai(m,dt,dist,dx,dz)){}else if(m.type==="spider")spiderAI(m,dt,dist,dx,dz);else if(m.type==="villager")villagerAI(m,dt);else if(m.type==="golem")golemAI(m,dt,dist);else if(m.type==="zombie"){
       if(DAY.dayf>0.75&&get(Math.floor(m.x),Math.floor(m.y+0.2),Math.floor(m.z))!==WATER){m.hp-=dt*3;m.hurt=Math.max(m.hurt,0.1);if(m.hp<=0){mobs.splice(i,1);continue;}}
-      if(S.mode==="survival"&&dist<(m.aggro||50)){
+      if(S.mode==="survival"&&dist<(m.aggro||24)){
         m.yaw=Math.atan2(-dx,-dz);m.moving=dist>0.95;m.cd-=dt;
         if(dist<1.2&&Math.abs(P.y-m.y)<1.7&&m.cd<=0){m.cd=1.1;hurtPlayer(3,m.x,m.z);}
       }else{m.t-=dt;if(m.t<=0){m.moving=Math.random()<0.5;m.yaw=Math.random()*6.283;m.t=rnd(1.5,4);}}
@@ -992,7 +992,7 @@ function update(dt){
     if(g<1)mobs.push(makeMob("golem",VIL.x+3,VIL.y+0.02,VIL.z+4));}}
   S.spawnT-=dt;if(S.spawnT<=0){S.spawnT=1.5;let pc=0;for(const m of mobs)if(!HOSTILEX[m.type])pc++;if(pc<44)spawnHerd(40,95);}
   S.zSpawnT-=dt;if(S.zSpawnT<=0){S.zSpawnT=2.5;if(DAY.night&&surv&&countType("spider")<4){for(let k=0;k<6;k++){const a=Math.random()*6.283,d=rnd(18,40);if(spawnAt("spider",P.x+Math.cos(a)*d,P.z+Math.sin(a)*d))break;}}
-  if(DAY.night&&surv&&countType("zombie")<14){for(let k=0;k<10;k++){const fa=Math.atan2(-Math.cos(P.yaw),-Math.sin(P.yaw)),a=Math.random()<0.7?fa+(Math.random()-0.5)*1.6:Math.random()*6.283,d=rnd(11,26);if(spawnAt("zombie",P.x+Math.cos(a)*d,P.z+Math.sin(a)*d))break;}}}
+  if(DAY.night&&surv&&countType("zombie")<6){for(let k=0;k<10;k++){const fa=Math.atan2(-Math.cos(P.yaw),-Math.sin(P.yaw)),a=Math.random()<0.7?fa+(Math.random()-0.5)*1.6:Math.random()*6.283,d=rnd(28,44);if(spawnAt("zombie",P.x+Math.cos(a)*d,P.z+Math.sin(a)*d))break;}}}
   EX2.update(dt);
   updateHUD(false);
   S.uiT-=dt;if(S.uiT<=0){S.uiT=0.5;updateClock();}
