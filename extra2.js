@@ -438,7 +438,7 @@ function tidyMenu(){
   const card=$$("start").firstElementChild;if(!card||card.dataset.tidy)return;card.dataset.tidy=1;card.classList.add("menu");
   const h1=card.querySelector("h1"),tag=card.querySelector("p"),btns=[...card.querySelectorAll("button")];
   const mp=btns.find(b=>b.textContent.includes("Multiplayer")),sk=btns.find(b=>b.textContent.includes("Skin")),chb=btns.find(b=>b.textContent.includes("Chaos"));
-  tag.textContent="Sandbox balok 3D · survival · chaos bareng teman";tag.className="tag";
+  tag.textContent="Sandbox balok 3D · survival · chaos bareng teman · v2.1";tag.className="tag";
   const grid=el("div",{class:"mgrid"});grid.appendChild(mp);grid.appendChild(sk);if(chb){chb.style.gridColumn="1 / -1";chb.style.background="#b5391f";grid.appendChild(chb);}
   const st=el("details",{class:"mdet"});el("summary",{text:"⚙ Pengaturan"},st);el("div",{class:"lbl",text:"Tingkat darah / gore"},st);st.appendChild($$("goreRow"));st.appendChild($$("sndBtn"));
   const hp=el("details",{class:"mdet"});el("summary",{text:"📖 Cara bermain"},hp);hp.appendChild($$("help"));
@@ -1653,7 +1653,7 @@ const MPCOL=[[.9,.2,.2],[.2,.5,.95],[.95,.8,.2],[.2,.8,.4]];
 const pcount=()=>Object.keys(MP.rp).length+1;
 function loadPeer(cb,fail){
   if(window.Peer){cb();return;}
-  const srcs=["peerjs.min.js","https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js","https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"];
+  const srcs=["peerjs.min.js?v=1794648371","https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js","https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"];
   const tryN=i=>{if(i>=srcs.length){if(fail)fail();return;}const sc=document.createElement("script");sc.src=srcs[i];sc.onload=()=>window.Peer?cb():tryN(i+1);sc.onerror=()=>tryN(i+1);document.head.appendChild(sc);};tryN(0);
 }
 function bcast(d,except){for(const k in MP.conns){if(k===except)continue;try{MP.conns[k].send(d);}catch(e){}}}
