@@ -1658,7 +1658,7 @@ function loadPeer(cb,fail){
 }
 function bcast(d,except){for(const k in MP.conns){if(k===except)continue;try{MP.conns[k].send(d);}catch(e){}}}
 function wrapWorld(){
-  if(MP.wrapped)return;MP.wrapped=true;MP.cfg=window.DK_PEER_CFG||null;
+  if(MP.wrapped)return;MP.wrapped=true;MP.cfg=window.DK_PEER_CFG||{debug:0,config:{iceTransportPolicy:"all",iceCandidatePoolSize:4,iceServers:[{urls:"stun:stun.l.google.com:19302"},{urls:"stun:stun1.l.google.com:19302"},{urls:"stun:global.stun.twilio.com:3478"},{urls:["turn:openrelay.metered.ca:80","turn:openrelay.metered.ca:443","turn:openrelay.metered.ca:443?transport=tcp","turns:openrelay.metered.ca:443?transport=tcp"],username:"openrelayproject",credential:"openrelayproject"},{urls:"turn:0.peerjs.com:3478",username:"peerjs",credential:"peerjsp"}]}};
   const sb=setBlock;setBlock=function(x,y,z,id){sb(x,y,z,id);if(MP.on&&!MP.applying)bcast({t:"b",x,y,z,id});};
   const sv=save;save=function(){if(!MP.noSave)sv();};
 }
@@ -1679,22 +1679,24 @@ function mpHost(){
       c.on("data",d=>onMsg(c,d,c.peer));
       c.on("close",()=>{delete MP.conns[c.peer];const r=MP.rp[c.peer];delete MP.rp[c.peer];if(r)mpLog(r.name+" keluar");bcast({t:"left",pid:c.peer});mpRender();mpInfo();});
     });
-    p.on("error",e=>{if(e.type==="unavailable-id")mpHost();else mpStatus("Gagal: "+e.type);});
+    p.on("disconnected",()=>{try{p.reconnect();}catch(e){}});p.on("error",e=>{if(e.type==="unavailable-id")mpHost();else mpStatus("Gagal: "+e.type);});
   },()=>mpStatus("Gagal memuat PeerJS (butuh internet)"));
 }
-function mpJoin(code){
-  code=(code||"").trim().toUpperCase();if(!code)return;mpStatus("Menyambung…");
+function mpJoin(code,tries){
+  code=(code||"").trim().toUpperCase().replace(/^DKOTAK-/,"").replace(/[^A-Z0-9]/g,"");if(!code)return;tries=tries||0;mpStatus(tries?"Mencoba lagi ("+tries+")…":"Menyambung…");
   loadPeer(()=>{
-    wrapWorld();
-    const p=new window.Peer(undefined,MP.cfg||undefined);MP.peer=p;
+    wrapWorld();if(MP.peer){try{MP.peer.destroy();}catch(e){}}
+    const p=new window.Peer(undefined,MP.cfg||undefined);MP.peer=p;let done=false;
+    const retry=msg=>{if(done)return;done=true;try{p.destroy();}catch(e){}if(tries<2)setTimeout(()=>mpJoin(code,tries+1),800);else mpStatus(msg);};
     p.on("open",id=>{MP.me=id;const c=p.connect("dkotak-"+code,{reliable:true});
-      const to=setTimeout(()=>mpStatus("Dunia tidak ketemu / koneksi gagal"),15000);
-      c.on("open",()=>{clearTimeout(to);MP.on=true;MP.host=false;MP.code=code;MP.conns.host=c;c.send({t:"hi",name:MP.name,look:X.look});mpRender();mpInfo();});
+      const to=setTimeout(()=>retry("Gagal tersambung. Pastikan host sudah buka Multiplayer & ID benar ("+code+"). Coba ganti jaringan (Wi-Fi/data)."),25000);
+      c.on("open",()=>{if(done)return;done=true;clearTimeout(to);MP.on=true;MP.host=false;MP.code=code;MP.conns.host=c;c.send({t:"hi",name:MP.name,look:X.look});mpRender();mpInfo();});
+      c.on("error",()=>{clearTimeout(to);retry("Koneksi ke host gagal");});
       c.on("data",d=>onMsg(c,d,"host"));
-      c.on("close",()=>{mpLog("Host keluar dari dunia");MP.on=false;MP.rp={};mpInfo();mpRender();});
+      c.on("close",()=>{if(!done)return;mpLog("Host keluar dari dunia");MP.on=false;MP.rp={};mpInfo();mpRender();});
     });
-    p.on("error",e=>mpStatus("Gagal: "+e.type));
-  },()=>mpStatus("Gagal memuat PeerJS"));
+    p.on("error",e=>{if(e.type==="peer-unavailable")retry("ID "+code+" tidak ditemukan. Host harus menekan Buat Dunia dulu & biarkan layarnya tetap terbuka.");else retry("Gagal: "+e.type);});
+  },()=>mpStatus("Gagal memuat PeerJS (butuh internet)"));
 }
 const startPayload=()=>({t:"start",seed,edits,pos:[P.x,P.y,P.z]});
 function startGame(){const st=$$("start");if(st&&!st.classList.contains("hide"))$$("play").click();}
