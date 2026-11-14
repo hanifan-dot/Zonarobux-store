@@ -344,7 +344,23 @@ const CSS3=`
 .pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:6px 0}.pgrid button{padding:8px 2px;font-size:12px}
 .opts{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}.opts button{padding:8px 10px;font-size:12px}
 .pgrid button.on,.opts button.on{outline:2px solid #7dff7d}
-#blindx{}
+#start .card.menu{max-width:360px;max-height:94vh;overflow-y:auto;padding:22px 18px 16px;background:linear-gradient(#24374e,#172333);border:1px solid #3b5575}
+.menu h1{font-size:32px;letter-spacing:3px;margin:0 0 2px;background:linear-gradient(#b4ff8c,#4fb83a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.menu .tag{font-size:12px;color:#9fb2c8;margin:0 0 16px}
+.menu #play{width:100%;padding:16px;font-size:20px;border-radius:12px;margin:0 0 10px;box-shadow:0 4px 0 #2d6a20}
+.menu #play::before{content:"▶  "}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}.mgrid button{margin:0;width:100%;padding:13px 6px;font-size:14px}.mgrid button:first-child{background:#2f6fb5;box-shadow:0 3px 0 #1f4a7c}
+.menu #modeRow{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:0 0 6px}.menu #modeRow button{margin:0;width:100%}
+.menu #modeDesc{font-size:12px;color:#9fb2c8;margin:4px 2px 4px;min-height:34px}
+.mdet{border-top:1px solid #33475f;margin-top:8px;padding-top:4px;text-align:left}
+.mdet summary{cursor:pointer;font-size:14px;color:#c9d6e4;padding:9px 2px;list-style:none}.mdet summary::-webkit-details-marker{display:none}
+.mdet summary::before{content:"▸  "}.mdet[open] summary::before{content:"▾  "}
+.mdet .lbl{font-size:12px;color:#8ea3ba;margin:6px 0 4px}
+.mdet ul{margin:0;padding-left:18px;font-size:13px;line-height:1.5;color:#b9c6d4}
+.menu #goreRow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0 0 8px}.menu #goreRow button{margin:0;width:100%;padding:10px 2px;font-size:12px}
+.menu #sndBtn{width:100%;margin:0 0 6px;padding:11px}
+.menu #newWorld{width:100%;margin-top:10px;font-size:13px;padding:11px;background:#4a2d2d}
+#mpInfo{background:rgba(125,255,125,.12);border:1px solid #3d7a3d;border-radius:8px;padding:8px;font-size:13px;margin:0 0 10px}
 .inp{width:100%;box-sizing:border-box;padding:10px;border-radius:8px;border:2px solid #456;background:#0e1824;color:#fff;font-size:15px;margin:6px 0}.bigid{font-size:38px;letter-spacing:6px;text-align:center;font-weight:800;color:#7dff7d;margin:8px 0}
 #wsplats{position:fixed;inset:0;pointer-events:none;z-index:3}
 .ws{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(150,0,0,.85),rgba(120,0,0,.5) 55%,rgba(100,0,0,0) 72%)}
@@ -418,6 +434,16 @@ function renderLook(){
     el("div",{text:r[0]},b);const w=el("div",{class:"opts"},b);
     r[1].forEach((n,i)=>{const s=el("button",{class:"alt"+((L[r[2]]|0)===i?" on":""),text:n},w);s.addEventListener("click",()=>{L[r[2]]=i;ch();});});}
 }
+function tidyMenu(){
+  const card=$$("start").firstElementChild;if(!card||card.dataset.tidy)return;card.dataset.tidy=1;card.classList.add("menu");
+  const h1=card.querySelector("h1"),tag=card.querySelector("p"),btns=[...card.querySelectorAll("button")];
+  const mp=btns.find(b=>b.textContent.includes("Multiplayer")),sk=btns.find(b=>b.textContent.includes("Skin")),chb=btns.find(b=>b.textContent.includes("Chaos"));
+  tag.textContent="Sandbox balok 3D · survival · chaos bareng teman";tag.className="tag";
+  const grid=el("div",{class:"mgrid"});grid.appendChild(mp);grid.appendChild(sk);if(chb){chb.style.gridColumn="1 / -1";chb.style.background="#b5391f";grid.appendChild(chb);}
+  const st=el("details",{class:"mdet"});el("summary",{text:"⚙ Pengaturan"},st);el("div",{class:"lbl",text:"Tingkat darah / gore"},st);st.appendChild($$("goreRow"));st.appendChild($$("sndBtn"));
+  const hp=el("details",{class:"mdet"});el("summary",{text:"📖 Cara bermain"},hp);hp.appendChild($$("help"));
+  for(const e of[h1,tag,$$("mpInfo"),$$("play"),grid,$$("modeRow"),$$("modeDesc"),st,hp,$$("newWorld"),$$("err")])card.appendChild(e);
+}
 function initUI(){
   const st=document.createElement("style");st.textContent=CSS2+CSS3;document.head.appendChild(st);
   const b=document.body;el("div",{id:"flashw"},b);el("div",{id:"chip"},b);
@@ -425,7 +451,7 @@ function initUI(){
   const tbs=$$("tbs"),more=el("button",{id:"tbMore",class:"tb",text:"⋯"}),qb=el("button",{id:"tbQuest",class:"tb sec",text:"📜"},tbs),lb=el("button",{id:"tbLook",class:"tb sec",text:"🎨"},tbs);
   tbs.insertBefore(more,$$("tbCam"));tbs.appendChild(qb);tbs.appendChild(lb);
   tapEl(more,()=>tbs.classList.toggle("open"));
-  makePanel("qp","📜 Misi & Peta");makePanel("ch","📦 Peti");makePanel("mpp","🌐 Multiplayer");makePanel("cht","💬 Obrolan");el("p",{id:"mpInfo",style:"display:none;color:#7dff7d;font-weight:700;margin:8px 0"},$$("start").firstElementChild||b);const mb=el("button",{text:"🌐 Multiplayer"});$$("play").insertAdjacentElement("afterend",mb);mb.addEventListener("click",()=>{SFX.click();mpRender();panels.mpp.open();});const cb=el("button",{id:"tbChat",class:"tb sec",text:"💬"},$$("tbs"));cb.addEventListener("click",()=>{if(S.paused)return;renderChat();panels.cht.open();$$("tbs").classList.remove("open");});panels.ch.onClose=()=>A.savePlayer();el("div",{id:"wsplats"},b);el("div",{id:"blind"},b);const sb=el("button",{class:"alt",text:"🎨 Desain Skin"});$$("play").insertAdjacentElement("afterend",sb);sb.addEventListener("click",()=>{SFX.click();renderLook();panels.lk.open();});makePanel("lk","🎨 Karakter");makePanel("shp","🏪 Kedai");
+  makePanel("qp","📜 Misi & Peta");makePanel("ch","📦 Peti");makePanel("mpp","🌐 Multiplayer");makePanel("cht","💬 Obrolan");makePanel("chs","💥 Chaos");el("p",{id:"mpInfo",style:"display:none;color:#7dff7d;font-weight:700;margin:8px 0"},$$("start").firstElementChild||b);const mb=el("button",{text:"🌐 Multiplayer"});const chb=el("button",{text:"💥 Chaos"});$$("play").insertAdjacentElement("afterend",chb);chb.addEventListener("click",()=>{SFX.click();chaosPanel();panels.chs.open();});$$("play").insertAdjacentElement("afterend",mb);mb.addEventListener("click",()=>{SFX.click();mpRender();panels.mpp.open();});const cb=el("button",{id:"tbChat",class:"tb sec",text:"💬"},$$("tbs"));cb.addEventListener("click",()=>{if(S.paused)return;renderChat();panels.cht.open();$$("tbs").classList.remove("open");});panels.ch.onClose=()=>A.savePlayer();el("div",{id:"wsplats"},b);el("div",{id:"blind"},b);const sb=el("button",{class:"alt",text:"🎨 Desain Skin"});$$("play").insertAdjacentElement("afterend",sb);sb.addEventListener("click",()=>{SFX.click();renderLook();panels.lk.open();});makePanel("lk","🎨 Karakter");makePanel("shp","🏪 Kedai");
   tapEl(qb,()=>{if(S.paused)return;renderQuests();panels.qp.open();tbs.classList.remove("open");});
   tapEl(lb,()=>{if(S.paused)return;renderLook();panels.lk.open();tbs.classList.remove("open");});
   // gerbang 18+
@@ -441,6 +467,7 @@ function initUI(){
     const x=el("button",{class:"alt","data-g":m[0],text:m[1]},row);x.addEventListener("click",()=>{X.gore=m[0];SFX.click();for(const q of row.children)q.classList.toggle("on",q.dataset.g===X.gore);A.savePlayer();});}
   for(const q of row.children)q.classList.toggle("on",q.dataset.g===X.gore);
   addEventListener("keydown",e=>{if(e.code==="KeyQ")dismount();});
+  tidyMenu();
   renderWounds();
 }
 /* ================= Misi harian ================= */
@@ -474,7 +501,7 @@ function mkHuman(o){
   if(o.visor)head.push(add(0,1.64,-.27,.5,.12,.02,[.9,.1,.1]));
   add(0,1.05,0,.52,.7,.28,o.top);add(0,1.12,-.03,.54,.42,.3,o.vest||o.top);
   if(o.apron)add(0,.95,-.16,.44,.6,.04,[.95,.95,.92]);
-  const arms=[add(-.36,1.0,0,.2,.7,.2,o.top,{rot:o.gun?1.25:0,leg:o.gun?.08:1,py:1.35}),add(.36,1.0,0,.2,.7,.2,o.top,{rot:o.gun?1.3:0,leg:o.gun?-.08:-1,py:1.35})];
+  const arms=[add(-.36,1.0,0,.2,.7,.2,o.top,{rot:(o.gun||o.zarms)?1.25:0,leg:(o.gun||o.zarms)?.08:1,py:1.35}),add(.36,1.0,0,.2,.7,.2,o.top,{rot:(o.gun||o.zarms)?1.3:0,leg:(o.gun||o.zarms)?-.08:-1,py:1.35})];
   add(-.13,.35,0,.22,.7,.22,o.pants,{leg:1,py:.7});add(.13,.35,0,.22,.7,.22,o.pants,{leg:-1,py:.7});
   if(o.gun)add(0,1.13,-.52,.1,.13,.8*(o.glen||1),[.1,.1,.12]);
   if(o.hat)add(0,1.95,0,.7,.06,.7,o.hat);
@@ -557,6 +584,7 @@ function goreDeath(m){
 const countT=t=>{let n=0;for(const m of mobs())if(m.type===t)n++;return n;};
 function kill(m,byP){
   const T=TYPES[m.type];if(m.xdead)return;m.xdead=true;if(DV.m===m)dismount();
+  if(m.cz)zKill(m,byP);else if(m.team)wKill(m,byP);
   if(byP){
     if(m.type==="zombie"){track("zombie");if(Math.random()<(X.bloodMoon?.8:.35))coins(X.bloodMoon?2:1);}
     else if(m.type==="soldier"){track("soldier");coins(ri(2,5));}
@@ -1036,6 +1064,7 @@ function ai(m,dt,dist,dx,dz){
     if(m.fx.stun>0){m.fx.stun-=dt;m.moving=false;return true;}
     if(m.fx.dance>0){m.fx.dance-=dt;if(m.ground&&Math.random()<dt*3)m.vy=6;m.spin=Math.max(m.spin||0,6);m.moving=false;return true;}
   }
+  if(m.cz)return zAI(m,dt,dist,dx,dz);if(m.team)return wAI(m,dt,dist,dx,dz);if(m.xflag){m.moving=false;return true;}
   const v=VEH[t];
   if(v){if(DV.m===m){ride(m,dt);return true;}if(!v.animal){m.moving=false;m.spd=0;m.drv=false;return true;}return false;}
   if(t==="villager"){m.hide=m.hide||[];m.hide[GI()]=!(m.angry>0);if(m.angry>0&&S.mode==="survival")return vgun(m,dt,dist,dx,dz);if(m.angry>0)m.angry=0;return false;}
@@ -1075,6 +1104,7 @@ function softLand(){const b=get(Math.floor(P.x),Math.floor(P.y-.1),Math.floor(P.
 let BASE=null,BASE2=null;const SHOPS=[];
 function gen(){
   BASE=null;SHOPS.length=0;for(const k in LOOT)delete LOOT[k];for(const k in SHELF)delete SHELF[k];
+  if(chaosOn()){chaosGen();return;}
   const S3=(x,y,z,id)=>{if(x>=0&&z>=0&&x<W&&z<D&&y>=0&&y<H)blocks[idx(x,y,z)]=id;};
   const vil=A.VIL(),vx=vil?vil.x:128,vz=vil?vil.z:128;
   const flat=(cx,cz,rx,rz,bad0)=>{let mn=99,mx=0,bad=0;for(let dz=-rz;dz<=rz;dz+=4)for(let dx=-rx;dx<=rx;dx+=4){const x=cx+dx,z=cz+dz;if(x<2||z<2||x>=W-2||z>=D-2)return null;const h=hm[z*W+x];if(h<=SEA+2){if(++bad>(bad0||0))return null;continue;}mn=Math.min(mn,h);mx=Math.max(mx,h);}return mx-mn;};
@@ -1205,6 +1235,7 @@ const kind=kinds[i],wl=WARES[kind],sh={cx,cz,h0,kind,mood:[.8,1,1.3][Math.floor(
 }
 /* ================= Populasi ================= */
 function populate(){
+  if(chaosOn()){chaosPop();return;}
   const L=A.mobs(),sp=(type,x,y,z,ex)=>{const m=A.makeMob(type,x,y+.02,z);if(ex)Object.assign(m,ex);L.push(m);return m;};
   if(BASE){
     for(const s of BASE.soldiers)sp("soldier",s[0],s[1],s[2],{home:[s[0],s[2]]});
@@ -1218,12 +1249,367 @@ function populate(){
   for(let k=0,n=0;k<300&&n<4;k++){const x=Math.floor(rnd(20,236)),z=Math.floor(rnd(20,236)),gy=A.groundY(x,z);if(gy<SEA+1)continue;sp("pig",x+.5,gy,z+.5);n++;}
   const gy=A.groundY(Math.floor(P.x+6),Math.floor(P.z+6));if(gy>0)spawnVeh("bike",P.x+6,gy,P.z+6);const g2=A.groundY(Math.floor(P.x-4),Math.floor(P.z+5));if(g2>0)spawnVeh("skate",P.x-4,g2,P.z+5);
 }
+/* ================= CHAOS: Kota Zombie & Perang Parit ================= */
+const chaosOn=()=>!!X.world&&X.world!=="normal";
+const sb3=(x,y,z,id)=>{if(x>=0&&z>=0&&x<W&&z<D&&y>=0&&y<H)blocks[idx(x,y,z)]=id;};
+const fillB=(x0,y0,z0,x1,y1,z1,id)=>{for(let y=y0;y<=y1;y++)for(let z=z0;z<=z1;z++)for(let x=x0;x<=x1;x++)sb3(x,y,z,id);};
+const shellB=(x0,z0,w,d,h,y0,wall,roof)=>{fillB(x0,y0,z0,x0+w-1,y0+h-1,z0+d-1,wall);fillB(x0+1,y0,z0+1,x0+w-2,y0+h-1,z0+d-2,0);fillB(x0,y0+h,z0,x0+w-1,y0+h,z0+d-1,roof);};
+const ZR=40;
+/* ---- jenis zombie ---- */
+const ZT={
+ walker:{n:"Zombie",hp:20,sp:2.2,dmg:3,skin:[.45,.6,.4],top:[.3,.35,.4],pants:[.25,.28,.4]},
+ runner:{n:"Runner",hp:14,sp:5.4,dmg:3,skin:[.6,.5,.4],top:[.55,.15,.15],pants:[.2,.2,.25]},
+ gendut:{n:"Gendut Asam",hp:75,sp:1.5,dmg:6,k:1.35,skin:[.55,.68,.35],top:[.5,.55,.3],pants:[.3,.3,.2],w:"acid"},
+ muntah:{n:"Muntah Darah",hp:22,sp:2.2,dmg:3,skin:[.6,.6,.45],top:[.45,.1,.1],pants:[.25,.2,.2],w:"spit"},
+ tank:{n:"Tank",hp:160,sp:2.7,dmg:12,k:1.55,skin:[.5,.45,.4],top:[.25,.25,.3],pants:[.2,.2,.2],w:"charge"},
+ bocah:{n:"Bocah",hp:8,sp:4.2,dmg:2,k:.6,skin:[.7,.62,.5],top:[.3,.5,.7],pants:[.4,.3,.2]},
+ perayap:{n:"Perayap",hp:12,sp:3.2,dmg:3,k:.5,skin:[.4,.5,.35],top:[.3,.25,.2],pants:[.2,.2,.2]},
+ lompat:{n:"Pelompat",hp:24,sp:3,dmg:4,skin:[.5,.55,.35],top:[.2,.4,.2],pants:[.15,.3,.15],w:"leap"},
+ racun:{n:"Racun",hp:26,sp:2.4,dmg:3,skin:[.5,.75,.3],top:[.35,.6,.2],pants:[.2,.35,.15],w:"poison"},
+ bom:{n:"Bom Jalan",hp:16,sp:4.4,dmg:0,skin:[.7,.5,.4],top:[.8,.7,.1],pants:[.5,.1,.1],w:"bomb"},
+ api:{n:"Api",hp:28,sp:2.8,dmg:3,skin:[.35,.2,.15],top:[.95,.45,.1],pants:[.6,.2,.05],w:"fire"},
+ es:{n:"Es",hp:28,sp:2.4,dmg:3,skin:[.7,.85,.95],top:[.5,.75,.95],pants:[.35,.55,.8],w:"ice"},
+ listrik:{n:"Listrik",hp:30,sp:2.8,dmg:3,skin:[.6,.6,.5],top:[.95,.9,.2],pants:[.3,.3,.35],w:"shock"},
+ penjerit:{n:"Penjerit",hp:22,sp:2.6,dmg:2,skin:[.8,.75,.7],top:[.9,.9,.95],pants:[.3,.3,.4],w:"scream"},
+ pemburu:{n:"Pemburu",hp:45,sp:4.6,dmg:6,skin:[.55,.2,.2],top:[.3,.1,.1],pants:[.15,.1,.1],w:"leap"},
+ tentara:{n:"Tentara Mayat",hp:85,sp:2.6,dmg:5,skin:[.5,.55,.45],top:[.28,.34,.22],pants:[.2,.25,.17]},
+ dokter:{n:"Dokter Gila",hp:30,sp:2.5,dmg:3,skin:[.6,.7,.55],top:[.95,.95,.95],pants:[.4,.6,.7],w:"heal"},
+ raksasa:{n:"Raksasa",hp:340,sp:2.2,dmg:16,k:2.3,skin:[.45,.4,.38],top:[.35,.3,.28],pants:[.2,.2,.22],w:"slam",boss:1},
+ bayangan:{n:"Bayangan",hp:30,sp:3.2,dmg:5,skin:[.1,.1,.14],top:[.06,.06,.1],pants:[.05,.05,.08],w:"blink"},
+ ratu:{n:"Ratu Zombie",hp:260,sp:2.4,dmg:8,k:1.5,skin:[.55,.4,.6],top:[.5,.1,.45],pants:[.3,.1,.3],w:"summon",boss:1},
+ anjing:{n:"Anjing Zombie",hp:16,sp:6,dmg:3,k:.55,skin:[.4,.28,.2],top:[.35,.25,.18],pants:[.3,.2,.15]},
+ kembar:{n:"Kembar",hp:36,sp:2.8,dmg:4,skin:[.65,.55,.7],top:[.6,.3,.65],pants:[.3,.2,.4],w:"split"},
+ pelempar:{n:"Pelempar",hp:24,sp:2.4,dmg:3,skin:[.5,.5,.4],top:[.5,.35,.2],pants:[.3,.25,.15],w:"throw"}
+};
+for(const k in ZT){const z=ZT[k],c=z.top;defHuman("z_"+k,{skin:z.skin,helm:[c[0]*.5,c[1]*.5,c[2]*.5],top:z.top,pants:z.pants,zarms:1,k:z.k||1,visor:k==="bayangan"||k==="ratu"},z.hp,z.sp,TYPES.zombie&&TYPES.zombie.snd||"hmm");TYPES["z_"+k].far=110;}
+const ZNAME=n=>ZT[n]?ZT[n].n:n;
+/* ---- tim perang ---- */
+const WCOL={1:{top:[.2,.35,.7],helm:[.12,.2,.45],pants:[.18,.22,.35]},2:{top:[.65,.15,.15],helm:[.4,.1,.1],pants:[.3,.17,.17]}};
+for(const t of[1,2]){const c=WCOL[t],nm=t===1?"ally":"foe";
+ defHuman(nm,{skin:[.85,.65,.5],helm:c.helm,top:c.top,vest:[c.top[0]*.6,c.top[1]*.6,c.top[2]*.6],pants:c.pants,gun:1},40,3.1,"shout");
+ defHuman(nm+"M",{skin:[.85,.65,.5],helm:[.95,.95,.95],top:c.top,vest:[.95,.95,.95],pants:c.pants,gun:1},35,3.3,"shout");
+ TYPES[nm].far=TYPES[nm+"M"].far=400;}
+function defFlag(name,col){const P0=[B(0,1.4,0,.12,2.8,.12,[.4,.28,.15]),B(.5,2.35,0,.9,.6,.06,col),B(.5,1.95,0,.9,.1,.06,[.95,.95,.95])];TYPES[name]={hp:1e9,r:.3,h:2.8,sp:0,snd:"none",hs:"none",keep:true,parts:P0,head:[],arms:[],far:400};}
+defFlag("flag1",[.2,.4,.95]);defFlag("flag2",[.95,.15,.15]);
+/* ---- generator ---- */
+function chaosGen(){
+  const h0=16;X.cy=h0;blocks.fill(0);
+  for(let z=0;z<D;z++)for(let x=0;x<W;x++){hm[z*W+x]=h0;for(let y=0;y<h0-1;y++)blocks[idx(x,y,z)]=y<h0-4?STONE:DIRT;blocks[idx(x,h0-1,z)]=GRASS;}
+  X.cars=[];X.marts=[];X.zsp=null;
+  if(X.world==="zombie")genCity(h0);else genWar(h0);
+}
+function genCity(h0){
+  for(let z=0;z<D;z++)for(let x=0;x<W;x++)if(x%ZR<7||z%ZR<7)blocks[idx(x,h0-1,z)]=STONE;
+  const MART=[[1,1],[4,1],[1,4],[4,4],[2,3]];
+  for(let lz=0;lz<6;lz++)for(let lx=0;lx<6;lx++){
+    const bx=lx*ZR+7,bz=lz*ZR+7,sx=ZR-7,sz=ZR-7;if(bx+sx>W-2||bz+sz>D-2)continue;
+    const r=hash(lx,lz,seed+11),mart=MART.some(a=>a[0]===lx&&a[1]===lz);
+    if(mart){genMart(bx,bz,h0);continue;}
+    if(lx===3&&lz===3||r<.14){ // taman
+      for(let i=0;i<14;i++){const tx=bx+ri(2,sx-3),tz=bz+ri(2,sz-3);if(lx===3&&lz===3&&Math.abs(tx-123)<8&&Math.abs(tz-123)<8)continue;const th=ri(4,6);fillB(tx,h0,tz,tx,h0+th-1,tz,LOG);fillB(tx-2,h0+th-2,tz-2,tx+2,h0+th-1,tz+2,LEAVES);fillB(tx,h0+th,tz,tx,h0+th,tz,LEAVES);}
+      continue;}
+    if(r<.26){for(let k=0;k<5;k++)X.cars.push([bx+ri(3,sx-4),bz+ri(3,sz-4)]);continue;}
+    const w=ri(14,26),d=ri(14,26),x0=bx+ri(1,sx-w-1),z0=bz+ri(1,sz-d-1),f=ri(1,4),h=f*4;
+    const wall=hash(lx,lz,seed+12)<.6?BRICK:PLANKS;
+    shellB(x0,z0,w,d,h,h0,wall,STONE);
+    for(let y=h0+1;y<h0+h;y++)if((y-h0)%4===1||(y-h0)%4===2)for(let i=2;i<w-2;i+=3){sb3(x0+i,y,z0,GLASS);sb3(x0+i,y,z0+d-1,GLASS);}
+    const cx=x0+(w>>1),cz=z0+(d>>1);
+    fillB(cx-1,h0,z0,cx+1,h0+2,z0,0);fillB(cx-1,h0,z0+d-1,cx+1,h0+2,z0+d-1,0);fillB(x0,h0,cz-1,x0,h0+2,cz+1,0);fillB(x0+w-1,h0,cz-1,x0+w-1,h0+2,cz+1,0);
+    for(let k=1;k<f;k++){const y=h0+4*k-1;fillB(x0+1,y,z0+1,x0+w-2,y,z0+d-2,PLANKS);}
+    for(let k=1;k<f;k++){const sx2=x0+2,sz2=z0+2,yb=h0+4*(k-1);fillB(sx2,h0+4*k-1,sz2,sx2+2,h0+4*k-1,sz2+1,0);for(let i=0;i<4;i++)fillB(sx2+i,yb,sz2,sx2+i,yb+i,sz2+1,PLANKS);}
+    for(let k=0;k<f;k++)for(let t=0;t<3;t++){const tx=x0+ri(6,w-3),tz=z0+ri(4,d-3),ty=h0+4*k;if(t===0&&get(tx,ty,tz)===0)sb3(tx,ty,tz,11);}
+    for(let t=0;t<3;t++){const tx=x0+ri(6,w-3),tz=z0+d-2,ty=h0;sb3(tx,ty,tz,20);const it=Math.random()<.5?{item:130,n:ri(10,24)}:{item:Math.random()<.5?133:107,n:2};SHELF[idx(tx,ty,tz)]={shop:-1,item:it.item,n:it.n};}
+  }
+  // lampu & barikade
+  for(let k=0;k<6;k++)for(let i=10;i<W-10;i+=20){const zz=k*ZR+3;sb3(i,h0,zz-2,LOG);sb3(i,h0+1,zz-2,LOG);sb3(i,h0+2,zz-2,LOG);sb3(i,h0+3,zz-2,GLASS);sb3(zz-2,h0,i,LOG);sb3(zz-2,h0+1,i,LOG);sb3(zz-2,h0+2,i,LOG);sb3(zz-2,h0+3,i,GLASS);}
+  for(let n=0;n<40;n++){const rx=ri(8,W-10),rz=ri(8,D-10);const onR=(rx%ZR<7)!==(rz%ZR<7);if(!onR)continue;fillB(rx,h0,rz,rx+2,h0+1,rz,PLANKS);}
+  for(let n=0;n<26;n++){const k=ri(0,5),i=ri(10,W-14),vertical=Math.random()<.5;X.cars.push(vertical?[k*ZR+ri(1,5),i]:[i,k*ZR+ri(1,5)]);}
+  X.sp=[123.5,h0+.02,123.5];
+}
+function genMart(bx,bz,h0){
+  const w=20,d=14,x0=bx+6,z0=bz+1;
+  fillB(x0,h0-1,z0,x0+w-1,h0-1,z0+d-1,PLANKS);
+  shellB(x0,z0,w,d,5,h0,BRICK,STONE);
+  fillB(x0+2,h0,z0,x0+w-3,h0+2,z0,GLASS);fillB(x0+w/2-2,h0,z0,x0+w/2+1,h0+2,z0,0);
+  for(let i=0;i<4;i++)sb3(x0+4+i*4,h0+3,z0,GLASS);
+  for(const row of[4,7,10])for(let x=x0+2;x<x0+w-2;x++){if((x-x0)%6===0)continue;sb3(x,h0,z0+row,20);
+    const pool=[[133,3],[107,2],[135,2],[133,2],[130,12],[107,3]],p=pool[ri(0,pool.length-1)];SHELF[idx(x,h0,z0+row)]={shop:-1,item:p[0],n:p[1]};}
+  for(let x=x0+2;x<x0+8;x++)sb3(x,h0,z0+2,11);
+  X.marts.push([x0,z0,w,d]);
+}
+function genWar(h0){
+  const trench=(x0,z0,x1,z1,wid)=>{ // jalur lurus sumbu x atau z
+    const horiz=Math.abs(x1-x0)>Math.abs(z1-z0);
+    if(horiz){for(let x=Math.min(x0,x1);x<=Math.max(x0,x1);x++)for(let dz=0;dz<wid;dz++){const z=z0+dz;fillB(x,h0-3,z,x,h0+3,z,0);sb3(x,h0-3,z,PLANKS);sb3(x,h0-4,z,DIRT);if(x%7<2&&(dz===0||dz===wid-1))sb3(x,h0-2,z,DIRT);}}
+    else for(let z=Math.min(z0,z1);z<=Math.max(z0,z1);z++){const xo=Math.round(Math.sin(z/9+x0)*2.5);for(let dx=0;dx<wid;dx++){const x=x0+xo+dx;fillB(x,h0-3,z,x,h0+3,z,0);sb3(x,h0-3,z,PLANKS);sb3(x,h0-4,z,DIRT);if(z%7<2&&(dx===0||dx===wid-1))sb3(x,h0-2,z,DIRT);
+      if(dx===0){sb3(x-1,h0,z,DIRT);if(z%5===0)sb3(x-2,h0,z,BRICK);}if(dx===wid-1){sb3(x+1,h0,z,DIRT);if(z%5===0)sb3(x+2,h0,z,BRICK);}}}
+  };
+  for(const bx of[46,62,194,210])trench(bx,0,bx,D-1,4);
+  for(const zc of[30,78,126,174,222]){trench(14,zc,66,zc,3);trench(190,zc,244,zc,3);}
+  // area tanpa-pria: kawah & pohon mati
+  for(let n=0;n<110;n++){const cx=ri(76,180),cz=ri(6,D-7),r=ri(2,5);for(let dz=-r;dz<=r;dz++)for(let dx=-r;dx<=r;dx++){const dd=Math.hypot(dx,dz);if(dd>r)continue;const dep=Math.round((1-dd/r)*2.4);for(let y=h0-1;y>=h0-1-dep;y--)sb3(cx+dx,y,cz+dz,0);sb3(cx+dx,h0-2-dep,cz+dz,DIRT);}}
+  for(let n=0;n<45;n++){const x=ri(76,180),z=ri(6,D-7),t=ri(4,7);if(get(x,h0-1,z)===GRASS)fillB(x,h0,z,x,h0+t-1,z,LOG);}
+  for(let n=0;n<70;n++){const x=ri(72,184),z=ri(4,D-6);if(get(x,h0-1,z)===GRASS)fillB(x,h0,z,x+ri(1,3),h0,z,BRICK);}
+  // markas
+  const base=(cx,col)=>{
+    fillB(cx-12,h0-1,104,cx+12,h0-1,152,STONE);
+    shellB(cx-6,110,12,9,5,h0,BRICK,STONE);fillB(cx-1,h0,110+8,cx+1,h0+2,110+8,0);
+    shellB(cx-6,138,12,9,5,h0,BRICK,STONE);fillB(cx-1,h0,138,cx+1,h0+2,138,0);
+    fillB(cx-1,h0,127,cx+1,h0,129,STONE);
+    for(let i=0;i<6;i++){sb3(cx-5+i*2,h0,121,20);SHELF[idx(cx-5+i*2,h0,121)]={shop:-1,item:i%3===0?138:i%3===1?133:130,n:i%3===0?40:i%3===1?3:20};}
+  };
+  base(18);base(238);
+  X.sp=[22,h0+.02,128];
+  X.flagPos={1:[22,128],2:[234,128]};
+}
+/* ---- populate ---- */
+function spawnTyped(type,x,z,ex){const gy=X.cy,m=A.makeMob(type,x,gy+.02,z);if(ex)Object.assign(m,ex);A.mobs().push(m);return m;}
+function openAt(x,z){x=Math.floor(x);z=Math.floor(z);if(x<3||z<3||x>=W-3||z>=D-3)return false;const gy=X.cy;for(let y=gy;y<gy+4;y++)if(get(x,y,z)!==AIR)return false;for(let y=gy+4;y<gy+24;y++)if(get(x,y,z)!==AIR)return false;return get(x,gy-1,z)!==AIR&&get(x,gy-1,z)!==WATER;}
+function chaosPop(){
+  const L=A.mobs();L.length=0;WR=null;ZS={kills:0,boss:0,t:0,bossT:40,N:0,shots:0};
+  if(X.world==="zombie"){
+    for(const c of X.cars)if(openAt(c[0],c[1]))spawnVeh(Math.random()<.5?"car":"jeep",c[0]+.5,X.cy,c[1]+.5);
+    for(let n=0;n<26;n++){const a=Math.random()*6.283,d=rnd(18,70),x=123.5+Math.cos(a)*d,z=123.5+Math.sin(a)*d;if(openAt(x,z))spawnZ("walker",x,z);}
+    for(const mt of X.marts)for(let k=0;k<3;k++){const m=spawnTyped("z_walker",mt[0]+rnd(3,mt[2]-3),mt[1]+rnd(3,mt[3]-3),{cz:1,zt:"walker"});}
+  }else initWar();
+  chaosHud();
+}
+/* ---- zombie ---- */
+let ZS={kills:0,boss:0,t:0,bossT:40,N:0};
+const zp=[],zc=[];
+function spawnZ(zt,x,z,ex){if(A.mobs().length>150||!openAt(x,z))return null;const m=spawnTyped("z_"+zt,Math.floor(x)+.5,Math.floor(z)+.5,ex);m.cz=1;m.zt=zt;return m;}
+function zPick(){
+  const L=Math.min(1,ZS.kills/70),w=[["walker",30],["runner",11+L*8],["bocah",8],["anjing",7],["perayap",7],["muntah",6],["gendut",5+L*3],["lompat",5],["racun",4],["bom",5],["api",3+L*2],["es",3+L*2],["listrik",3+L*2],["penjerit",3],["pemburu",L*6],["tentara",2+L*6],["dokter",3],["bayangan",L*5],["kembar",4],["pelempar",4],["tank",L*6]];
+  let s=0;for(const a of w)s+=a[1];let r=Math.random()*s;for(const a of w){r-=a[1];if(r<=0)return a[0];}return"walker";
+}
+function zSpawnTick(dt){
+  ZS.t-=dt;ZS.bossT-=dt;const L=A.mobs();let n=0,boss=0;for(const m of L)if(m.cz){n++;if(ZT[m.zt].boss)boss++;}
+  const cap=Math.min(48,16+Math.floor(ZS.kills/5));
+  if(ZS.t<=0){ZS.t=.4;if(n<cap)for(let k=0;k<3;k++){const fa=Math.atan2(-Math.cos(P.yaw),-Math.sin(P.yaw)),a=Math.random()<.75?fa+(Math.random()-.5)*1.7:Math.random()*6.283,d=rnd(12,30);const t=zPick();if(spawnZ(t,P.x+Math.cos(a)*d,P.z+Math.sin(a)*d))break;}}
+  if(ZS.bossT<=0&&boss<1){ZS.bossT=rnd(75,110);const t=Math.random()<.5?"raksasa":"ratu";for(let k=0;k<12;k++){const a=Math.random()*6.283;if(spawnZ(t,P.x+Math.cos(a)*34,P.z+Math.sin(a)*34)){chip("☠ "+ZNAME(t)+" muncul!");A.tone("sawtooth",90,50,1.2,.35);break;}}}
+}
+function zBite(m,Z){
+  A.hurtPlayer(Z.dmg,m.x,m.z);const w=Z.w,PZ=X.pz;
+  if(w==="poison"||m.zt==="muntah")PZ.poison=Math.max(PZ.poison,5);
+  if(w==="fire"){PZ.burn=Math.max(PZ.burn,3);chip("🔥 Kamu terbakar!");}
+  if(w==="ice"){PZ.slow=Math.max(PZ.slow,4);}
+  if(w==="charge"){const L=Math.hypot(P.x-m.x,P.z-m.z)||1;P.vx+=(P.x-m.x)/L*12;P.vz+=(P.z-m.z)/L*12;P.vy=Math.max(P.vy,5);}
+}
+function zProj(m,kind,col,dmg,pz){
+  const ex=P.x-m.x,ey=P.y+1.1-(m.y+1.4),ez=P.z-m.z,L=Math.hypot(ex,ey,ez)||1,sp=17;
+  zp.push({x:m.x,y:m.y+1.5,z:m.z,vx:ex/L*sp,vy:ey/L*sp+4.5*(L/sp),vz:ez/L*sp,col,dmg,pz,kind,t:4});
+}
+function zAI(m,dt,dist,dx,dz){
+  const Z=ZT[m.zt],surv=S.mode==="survival"&&!S.dead,k=Z.k||1;m.cd=(m.cd||0)-dt;m.ab=(m.ab===undefined?rnd(1,4):m.ab)-dt;
+  if(dist>82&&!Z.boss){const L=A.mobs(),i=L.indexOf(m);if(i>=0)L.splice(i,1);return true;}
+  if(!surv){m.moving=false;return true;}
+  m.yaw=Math.atan2(-dx,-dz);m.moving=dist>.95*k;m.sp=Z.sp;
+  const w=Z.w;
+  if(m.chg>0){m.chg-=dt;m.sp=Z.sp*2.7;}
+  if(w==="spit"||w==="throw"){if(dist>5&&dist<(w==="spit"?20:24)&&m.ab<=0){m.ab=rnd(2.2,3.6);if(w==="spit")zProj(m,"vomit",[.55,.05,.05],3,1);else zProj(m,"rock",[.4,.35,.3],5,0);}if(dist<11)m.moving=false;}
+  else if(w==="leap"){if(dist>3.5&&dist<12&&m.ab<=0&&m.ground){m.ab=rnd(2.5,4);m.vy=7.5;m.lv=[dx/dist*(dist*1.5),dz/dist*(dist*1.5),.6];}}
+  else if(w==="charge"){if(dist>6&&dist<18&&m.ab<=0){m.ab=rnd(4,6);m.chg=1.4;chip("🐂 Tank menyeruduk!");}}
+  else if(w==="shock"){if(dist<8&&m.ab<=0&&los(m,dist)){m.ab=rnd(2.2,3.5);A.hurtPlayer(4,m.x,m.z);X.pz.shock=.7;burst(P.x,P.y+1,P.z,10,4,()=>[1,1,.4],.09,.3,{g:0});A.tone("sawtooth",1400,300,.2,.25);}}
+  else if(w==="scream"){if(dist<32&&m.ab<=0){m.ab=rnd(9,13);A.tone("sawtooth",1100,250,.9,.4);chip("😱 Penjerit memanggil gerombolan!");for(let n=0;n<4;n++){const a=Math.random()*6.283;spawnZ(Math.random()<.5?"walker":"runner",P.x+Math.cos(a)*rnd(14,22),P.z+Math.sin(a)*rnd(14,22));}}}
+  else if(w==="heal"){if(m.ab<=0){m.ab=2;for(const o of A.mobs())if(o.cz&&o!==m&&o.hp>0&&o.hp<TYPES[o.type].hp&&Math.hypot(o.x-m.x,o.z-m.z)<8){o.hp=Math.min(TYPES[o.type].hp,o.hp+10);burst(o.x,o.y+1.4,o.z,4,1.2,()=>[.4,1,.5],.09,.6,{g:-1});}}}
+  else if(w==="slam"){if(dist<7&&m.ab<=0){m.ab=3.2;burst(m.x,m.y+.2,m.z,24,7,()=>[.5,.45,.4],.35,.8,{g:3});A.tone("sine",90,40,.5,.5);if(Math.abs(P.y-m.y)<2.5){A.hurtPlayer(14,m.x,m.z);const L=Math.hypot(dx,dz)||1;P.vx+=dx/L*10;P.vz+=dz/L*10;P.vy=Math.max(P.vy,7);}}}
+  else if(w==="blink"){if(dist>9&&m.ab<=0){m.ab=rnd(4,6);const a=Math.random()*6.283,nx=P.x+Math.cos(a)*5,nz=P.z+Math.sin(a)*5;if(openAt(nx,nz)){burst(m.x,m.y+1,m.z,12,2,()=>[.5,.2,.9],.12,.5,{g:-1});m.x=nx;m.z=nz;m.y=X.cy;burst(m.x,m.y+1,m.z,12,2,()=>[.5,.2,.9],.12,.5,{g:-1});}}}
+  else if(w==="summon"){if(dist<40&&m.ab<=0){m.ab=rnd(7,10);chip("👑 Ratu memanggil pasukan!");A.tone("sawtooth",300,120,.8,.35);for(let n=0;n<4;n++){const a=Math.random()*6.283;spawnZ(["walker","runner","bocah","anjing"][ri(0,3)],m.x+Math.cos(a)*3,m.z+Math.sin(a)*3);}}}
+  else if(w==="bomb"){if(dist<2.4&&!m.boomed){m.boomed=true;explode(m.x,m.y+1,m.z,3.4,18,1.2,{});A.killMob(m,false);return true;}}
+  else if(w==="fire"){if(Math.random()<dt*10)burst(m.x,m.y+1,m.z,1,.6,()=>[1,rnd(.3,.7),.1],.1,.4,{g:-3});}
+  else if(w==="ice"){if(Math.random()<dt*6)burst(m.x,m.y+1,m.z,1,.5,()=>[.7,.9,1],.08,.5,{g:-1});}
+  else if(w==="poison"){if(Math.random()<dt*6)burst(m.x,m.y+1,m.z,1,.5,()=>[.4,.9,.2],.1,.6,{g:-1});}
+  if(m.lv&&m.lv[2]>0){m.lv[2]-=dt;m.vx=m.lv[0];m.vz=m.lv[1];}
+  if(dist<1.35*k+.2&&Math.abs(P.y-m.y)<2.4*k&&m.cd<=0){m.cd=w==="slam"?2:1.1;if(w!=="bomb")zBite(m,Z);}
+  return true;
+}
+function zKill(m,byP){
+  const Z=ZT[m.zt],w=Z.w;ZS.kills++;
+  if(byP){coins(Z.boss?40:Math.random()<.4?1:0);const r=Math.random();if(Z.boss){A.give(138,40);A.give(133,3);A.give(130,30);chip("☠ "+Z.n+" tumbang! +hadiah");ZS.boss++;}else if(r<.18)A.give(130,8);else if(r<.26)A.give(133,1);else if(r<.3)A.give(138,10);}
+  if(w==="acid"){burst(m.x,m.y+1,m.z,46,7,()=>[.55,rnd(.8,1),.1],.3,.9,{g:3,b:.3});const d=Math.hypot(P.x-m.x,P.z-m.z);if(d<6&&S.mode==="survival")A.hurtPlayer(Math.max(2,Math.round(11*(1-d/6.5))),m.x,m.z);for(const o of A.mobs())if(o!==m&&o.cz&&Math.hypot(o.x-m.x,o.z-m.z)<5)A.hurtMob(o,25,m.x,m.z,false);zc.push({x:m.x,y:m.y,z:m.z,t:6,r:2.6,k:"acid"});A.tone("sine",200,60,.5,.5);chip("🤢 Asam lambung meledak!");}
+  else if(w==="poison"){zc.push({x:m.x,y:m.y,z:m.z,t:7,r:3.2,k:"poison"});burst(m.x,m.y+1,m.z,22,3,()=>[.4,.9,.2],.3,1,{g:-.5});}
+  else if(w==="bomb"&&!m.boomed){m.boomed=true;explode(m.x,m.y+1,m.z,3.4,18,1.2,{});}
+  else if(w==="fire"){burst(m.x,m.y+1,m.z,30,5,()=>[1,rnd(.3,.8),.1],.3,.8,{g:-2});if(Math.hypot(P.x-m.x,P.z-m.z)<3.5)X.pz.burn=Math.max(X.pz.burn,3);}
+  else if(w==="ice"){burst(m.x,m.y+1,m.z,26,4,()=>[.7,.9,1],.25,.8,{g:2});if(Math.hypot(P.x-m.x,P.z-m.z)<4)X.pz.slow=Math.max(X.pz.slow,3);}
+  else if(w==="split"){for(let n=0;n<2;n++){const c=spawnZ("bocah",m.x+rnd(-.8,.8),m.z+rnd(-.8,.8));if(c)c.hp=12;}}
+}
+function chaosEffects(dt){
+  const PZ=X.pz,surv=S.mode==="survival"&&!S.dead;
+  if(PZ.poison>0){PZ.poison-=dt;PZ.pt=(PZ.pt||0)-dt;if(PZ.pt<=0&&surv){PZ.pt=.8;A.hurtPlayer(1);burst(P.x,P.y+1.4,P.z,3,1,()=>[.4,.9,.2],.08,.5,{g:-1});}}
+  if(PZ.burn>0){PZ.burn-=dt;PZ.bt=(PZ.bt||0)-dt;if(get(Math.floor(P.x),Math.floor(P.y+.3),Math.floor(P.z))===WATER)PZ.burn=0;if(PZ.bt<=0&&surv){PZ.bt=.5;A.hurtPlayer(1);}burst(P.x,P.y+1.2,P.z,1,1,()=>[1,rnd(.3,.7),.1],.1,.4,{g:-3});}
+  if(PZ.slow>0){PZ.slow-=dt;const f=Math.pow(.9,dt*60);P.vx*=f;P.vz*=f;}
+  if(PZ.shock>0){PZ.shock-=dt;P.yaw+=(Math.random()-.5)*.3;}
+  for(let i=zp.length-1;i>=0;i--){const q=zp[i];q.t-=dt;q.vy-=9*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.z+=q.vz*dt;addP(q.x,q.y,q.z,0,0,0,.16,q.col,.3,{g:0});
+    let hit=solid(Math.floor(q.x),Math.floor(q.y),Math.floor(q.z)),hp=false;
+    if(surv&&Math.hypot(P.x-q.x,P.z-q.z)<.9&&q.y>P.y-.2&&q.y<P.y+2){hit=true;hp=true;}
+    if(hit||q.t<=0){if(hp){A.hurtPlayer(q.dmg,q.x,q.z);if(q.pz)PZ.poison=Math.max(PZ.poison,4);}burst(q.x,q.y,q.z,10,3,()=>q.col,.12,.5,{g:6});zp.splice(i,1);}}
+  for(let i=zc.length-1;i>=0;i--){const c=zc[i];c.t-=dt;c.tk=(c.tk||0)-dt;burst(c.x+rnd(-c.r,c.r)*.8,c.y+.3,c.z+rnd(-c.r,c.r)*.8,1,.5,()=>c.k==="acid"?[.5,.9,.1]:[.4,.8,.2],.25,1,{g:-.4});
+    if(c.tk<=0){c.tk=.5;if(surv&&Math.hypot(P.x-c.x,P.z-c.z)<c.r&&Math.abs(P.y-c.y)<2){A.hurtPlayer(1);if(c.k==="poison")PZ.poison=Math.max(PZ.poison,3);}}
+    if(c.t<=0)zc.splice(i,1);}
+}
+/* ---- perang ---- */
+let WR=null;
+function initWar(){
+  const h0=X.cy;WR={l:[[],[],[]],fl:[null,null,null],sc:[0,0,0],pool:[0,70,70],post:[0,"push","push"],pt:[0,30,35],lt:0,rt:0,over:false,pl:{x:P.x,y:P.y,z:P.z,isP:1,hp:20,team:1},carryP:0,gt:[],ot:0};
+  for(const t of[1,2]){const fp=X.flagPos[t],m=spawnTyped("flag"+t,fp[0]+.5,fp[1]+.5);m.xflag=1;WR.fl[t]={home:fp,m,car:null};}
+  for(const t of[1,2])for(let i=0;i<50;i++){const role=i<6?"medic":i<12?"grenadier":i<16?"sniper":i<22?"raider":"rifle";warSpawn(t,role,true,i);}
+}
+function warSpawn(t,role,init,i){
+  const z=init?clamp(14+i*4.6+rnd(-2,2),6,248):128+rnd(-14,14),x=init?(t===1?rnd(40,66):rnd(190,216)):(t===1?rnd(14,26):rnd(230,242));
+  const nm=(t===1?"ally":"foe")+(role==="medic"?"M":"");
+  const m=spawnTyped(nm,init?(t===1?[48,64][i%2]:[196,212][i%2])+.5+rnd(0,1):x,init?clamp(z,6,248):z,{team:t,role,lz:clamp(z,10,246),home:[t===1?20:236,128]});
+  if(!init)WR.pool[t]--;return m;
+}
+function wTarget(m){
+  const R=m.role==="sniper"?72:42;let best=null,bd=R;const L=WR.l[m.team===1?2:1];
+  for(let i=0;i<L.length;i++){const o=L[i];if(o.hp<=0)continue;const d=Math.hypot(o.x-m.x,o.z-m.z)*(o.carry?.4:1);if(d<bd&&Math.abs(o.y-m.y)<10&&losM(m,o)){bd=d;best=o;}}
+  if(m.team===2&&!S.dead&&S.mode==="survival"){const d=Math.hypot(P.x-m.x,P.z-m.z)*(WR.carryP?.4:1);if(d<bd&&los(m,Math.hypot(P.x-m.x,P.z-m.z))){best=WR.pl;}}
+  return best;
+}
+function wShoot(m,tg,d){
+  const hurt=m.hp<TYPES[m.type].hp*.4,ey=tg.y+1.1-(m.y+1.3),ex=tg.x-m.x,ez=tg.z-m.z,L=Math.hypot(ex,ey,ez)||1,sp=70,sn=m.role==="sniper";
+  addP(m.x+ex/L*.8,m.y+1.3,m.z+ez/L*.8,ex/L*sp,ey/L*sp,ez/L*sp,.07,[1,.85,.35],Math.min(.7,L/sp),{g:0});
+  burst(m.x+ex/L*.9,m.y+1.3,m.z+ez/L*.9,2,2,()=>[1,.7,.2],.09,.1,{g:0});shotAt(sn?"sniper":"rifle",m.x,m.z,1.1);
+  const acc=clamp((sn?.9:.6)-d*.009,.08,.88)*(hurt?.6:1);
+  if(Math.random()<acc){const dmg=(sn?14:5)*rnd(.8,1.25);if(tg.isP){if(!(DV.m&&!VEH[DV.m.type].animal))hitPlayer(dmg*.8,m.x,m.z,"rifle");else{DV.m.hp-=dmg;DV.m.hurt=.2;}}else A.hurtMob(tg,dmg,m.x,m.z,false);}
+}
+function wGren(m,tg){
+  const d=Math.hypot(tg.x-m.x,tg.z-m.z);WR.gt.push({t:1.1,x:tg.x+rnd(-2,2),y:tg.y+.5,z:tg.z+rnd(-2,2)});
+  for(let i=0;i<6;i++)addP(m.x+(tg.x-m.x)*i/6,m.y+2+Math.sin(i/6*3.14)*2,m.z+(tg.z-m.z)*i/6,0,0,0,.14,[.3,.4,.25],.5+i*.05,{g:0});
+}
+function wAI(m,dt,dist,dx,dz){
+  const T=TYPES[m.type],W2=WR;if(!W2||W2.over){m.moving=false;return true;}
+  m.cd=(m.cd||0)-dt;m.gc=(m.gc||rnd(3,8))-dt;m.tt=(m.tt||0)-dt;
+  const base=m.role==="medic"?3.3:3.1,hpf=m.hp/T.hp,hurt=hpf<.4;m.sp=base*(hurt?.55:1);
+  if(hurt&&Math.random()<dt*2)burst(m.x,m.y+1,m.z,1,.6,()=>[.6,0,0],.06,.4,{g:6});
+  if(m.tt<=0){m.tt=rnd(.3,.6);m.tg=wTarget(m);}
+  let tg=m.tg;if(tg&&(tg.hp<=0||(!tg.isP&&!A.mobs().includes(tg))))tg=m.tg=null;
+  const own=m.team,enemy=own===1?2:1,F=W2.fl[enemy],OF=W2.fl[own];
+  const fdist=(o)=>Math.hypot(o.x-m.x,o.z-m.z);
+  let d=tg?Math.hypot(tg.x-m.x,tg.z-m.z):0,go=null;
+  if(tg){m.yaw=Math.atan2(-(tg.x-m.x),-(tg.z-m.z));}
+  if(m.carry){go=OF.home;}
+  else if(m.role==="medic"){
+    let inj=null,bd=45;for(const o of W2.l[own]){if(o===m||o.hp>=TYPES[o.type].hp*.75)continue;const dd=fdist(o);if(dd<bd){bd=dd;inj=o;}}
+    if(own===1&&!S.dead&&S.hp<13){const dd=Math.hypot(P.x-m.x,P.z-m.z);if(dd<bd&&dd<40){inj=W2.pl;bd=dd;}}
+    if(inj){go=[inj.x,inj.z];if(bd<2.6&&m.cd<=0){m.cd=1.5;if(inj.isP){S.hp=Math.min(20,S.hp+5);A.updateHUD(true);chip("⛑ Medis menyembuhkanmu");}else inj.hp=Math.min(TYPES[inj.type].hp,inj.hp+12);burst(inj.x,inj.y+1.5,inj.z,6,1.5,()=>[.4,1,.5],.1,.7,{g:-1});}}
+    else if(tg&&d<22&&m.cd<=0){m.cd=rnd(1.2,2);wShoot(m,tg,d);}
+  }
+  else if(hurt){go=OF.home;if(tg&&d<26&&m.cd<=0){m.cd=rnd(1.4,2.2);wShoot(m,tg,d);}if(Math.hypot(m.x-OF.home[0],m.z-OF.home[1])<14&&Math.random()<dt)m.hp=Math.min(T.hp,m.hp+1.5);}
+  else if(m.role==="raider"&&!F.car){
+    go=F.home;if(tg&&d<14&&m.cd<=0){m.cd=rnd(.9,1.4);wShoot(m,tg,d);}
+  }
+  else{
+    if(tg){
+      if(m.cd<=0){m.cd=rnd(.8,1.5)*(m.role==="sniper"?2.4:1);wShoot(m,tg,d);}
+      if(m.role==="grenadier"&&m.gc<=0&&d>10&&d<32){m.gc=rnd(7,12);wGren(m,tg);}
+      const adv=m.role==="sniper"?false:W2.post[own]==="push"?d>13:d>28;
+      if(adv)go=[tg.x,tg.z];else m.moving=false;
+    }else{
+      m.ot=(m.ot||0)-dt;if(m.ot<=0||!m.obj){m.ot=rnd(8,14);const push=W2.post[own]==="push";const ox=own===1?(push?rnd(150,200):rnd(52,66)):(push?rnd(56,106):rnd(190,204));m.obj=[ox,clamp(m.lz+rnd(-14,14),6,250)];}
+      go=m.obj;if(m.role==="sniper"&&Math.abs(m.x-go[0])<8)go=null;
+    }
+  }
+  if(go){m.yaw=Math.atan2(-(go[0]-m.x),-(go[1]-m.z));m.moving=Math.hypot(go[0]-m.x,go[1]-m.z)>2.2;}
+  else if(!tg)m.moving=false;
+  m.sT=(m.sT||0)-dt;
+  if(m.sT<=0){m.sT=.45;if(m.moving&&Math.hypot(m.x-(m.lx||0),m.z-(m.lz2||0))<.2){m.stk=(m.stk||0)+1;if(m.ground)m.vy=9.6;if(m.stk>2){m.dodge=1;m.dyaw=m.yaw+rnd(-1.8,1.8);m.stk=0;}}else m.stk=0;m.lx=m.x;m.lz2=m.z;}
+  if(m.dodge>0){m.dodge-=dt;m.yaw=m.dyaw;m.moving=true;}
+  return true;
+}
+function wKill(m,byP){
+  if(!WR)return;const fl=m.carry;if(fl){fl.car=null;m.carry=null;wFlagHome(fl);chip("🚩 Pembawa bendera tewas — bendera kembali");}
+  if(byP){coins(m.role==="raider"?3:1);WR.k=(WR.k||0)+1;}
+}
+function wFlagHome(F){F.m.x=F.home[0]+.5;F.m.z=F.home[1]+.5;F.m.y=X.cy+.02;F.m.vx=F.m.vz=F.m.vy=0;}
+function warTick(dt){
+  const W2=WR;if(!W2||W2.over)return;
+  W2.lt-=dt;
+  if(W2.lt<=0){W2.lt=.3;W2.l=[[],[],[]];for(const m of A.mobs())if(m.team&&m.hp>0)W2.l[m.team].push(m);}
+  W2.pl.x=P.x;W2.pl.y=P.y;W2.pl.z=P.z;W2.pl.hp=S.hp;
+  for(const t of[1,2]){W2.pt[t]-=dt;if(W2.pt[t]<=0){W2.pt[t]=rnd(30,50);const a=W2.l[t].length,b=W2.l[t===1?2:1].length;W2.post[t]=(a>=b*.9&&Math.random()<.85)||Math.random()<.3?"push":"hold";}}
+  W2.rt-=dt;if(W2.rt<=0){W2.rt=3;for(const t of[1,2]){const alive=W2.l[t].length;if(alive<50&&W2.pool[t]>0){const rc=W2.l[t].filter(o=>o.role==="raider").length,rm=W2.l[t].filter(o=>o.role==="medic").length;warSpawn(t,rc<4?"raider":rm<4?"medic":Math.random()<.2?"grenadier":"rifle",false);}}}
+  for(let i=W2.gt.length-1;i>=0;i--){const g=W2.gt[i];g.t-=dt;if(g.t<=0){explode(g.x,g.y,g.z,3.6,15,1.1,{});W2.gt.splice(i,1);}}
+  // bendera
+  for(const t of[1,2]){
+    const F=W2.fl[t],e=t===1?2:1;if(!F)continue;
+    if(F.car){
+      const c=F.car;let alive=true,cx,cz,cy;
+      if(c==="P"){alive=!S.dead&&S.mode==="survival";cx=P.x+Math.sin(P.yaw)*.9;cz=P.z+Math.cos(P.yaw)*.9;cy=P.y+.4;}
+      else{alive=c.hp>0&&A.mobs().includes(c);cx=c.x+Math.sin(c.yaw)*.9;cz=c.z+Math.cos(c.yaw)*.9;cy=c.y+.4;}
+      if(!alive){F.car=null;W2.carryP=c==="P"?0:W2.carryP;wFlagHome(F);chip("🚩 Bendera "+(t===1?"Biru":"Merah")+" kembali ke markas");}
+      else{F.m.x=cx;F.m.z=cz;F.m.y=cy;F.m.vy=0;F.m.vx=F.m.vz=0;
+        const own=W2.fl[e],ox=own.home[0],oz=own.home[1],px=c==="P"?P.x:c.x,pz=c==="P"?P.z:c.z;
+        if(Math.hypot(px-ox,pz-oz)<4){W2.sc[e]++;F.car=null;if(c==="P")W2.carryP=0;else c.carry=null;wFlagHome(F);
+          chip((e===1?"🔵 Biru":"🔴 Merah")+" mencuri bendera! "+W2.sc[e]+"/3");A.tone("sine",500,1000,.5,.4);A.tone("sine",750,1500,.5,.3);
+          if(W2.sc[e]>=3){warEnd(e===1);}}}
+    }else{
+      // pengambilan oleh musuh tim t -> tim e
+      if(e===1&&!S.dead&&S.mode==="survival"&&Math.hypot(P.x-F.m.x,P.z-F.m.z)<2.4&&Math.abs(P.y-F.m.y)<3){F.car="P";W2.carryP=1;chip("🚩 Kamu membawa bendera musuh! Lari ke markas biru!");A.tone("square",440,880,.3,.3);}
+      else{for(const o of W2.l[e]){if(o.carry||o.hp<=0)continue;if(Math.hypot(o.x-F.m.x,o.z-F.m.z)<2.4&&Math.abs(o.y-F.m.y)<3&&(o.role==="raider"||Math.random()<.02)){F.car=o;o.carry=F;chip("🚩 "+(e===1?"Pasukan Biru":"Pasukan Merah")+" mengambil bendera "+(t===1?"Biru":"Merah")+"!");break;}}}
+    }
+  }
+}
+function warEnd(win){
+  WR.over=true;const d=el("div",{id:"cend",style:"position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.72);color:#fff;font:800 30px sans-serif;text-align:center;gap:14px"},document.body);
+  d.textContent=win?"🏆 MENANG! 3 bendera direbut":"💀 KALAH — musuh merebut 3 bendera";
+  const b=el("button",{text:"Kembali ke menu",style:"font-size:18px;padding:12px 22px;border-radius:12px;border:0;background:#5fa83a;color:#fff"},d);b.addEventListener("click",()=>location.reload());
+}
+/* ---- HUD & tick ---- */
+function chaosHud(){
+  let h=$$("warhud");if(!h)h=el("div",{id:"warhud",style:"position:fixed;top:6px;left:50%;transform:translateX(-50%);z-index:20;background:rgba(0,0,0,.55);color:#fff;font:700 13px sans-serif;padding:5px 12px;border-radius:10px;pointer-events:none;text-align:center;white-space:nowrap"},document.body);
+  h.style.display=chaosOn()?"block":"none";if(!chaosOn())return;
+  if(X.world==="zombie")h.textContent="🧟 Bunuh: "+ZS.kills+" · Boss: "+ZS.boss+" · Zombie: "+A.mobs().filter(m=>m.cz).length;
+  else if(WR){const a=WR.l[1].length,b=WR.l[2].length;h.textContent="🔵 "+WR.sc[1]+"/3  ⚔  "+a+" vs "+b+"  ⚔  "+WR.sc[2]+"/3 🔴"+(WR.carryP?"  🚩 Bawa bendera → markas biru!":"")+"  · cadangan "+WR.pool[1];}
+}
+function chaosTick(dt){
+  if(!chaosOn()||(typeof started!=="undefined"&&!started))return;
+  X.pz=X.pz||{poison:0,burn:0,slow:0,shock:0};
+  chaosEffects(dt);
+  X.hudT=(X.hudT||0)-dt;if(X.hudT<=0){X.hudT=.5;chaosHud();}
+  if(X.world==="zombie"){if(!S.dead)zSpawnTick(dt);}else warTick(dt);
+}
+function chaosRespawn(){
+  if(!chaosOn())return;X.pz={poison:0,burn:0,slow:0,shock:0};
+  if(X.sp){P.x=X.sp[0];P.y=X.sp[1]+.5;P.z=X.sp[2];P.vx=P.vy=P.vz=0;}
+  if(WR&&WR.fl[2]&&WR.fl[2].car==="P"){WR.fl[2].car=null;WR.carryP=0;wFlagHome(WR.fl[2]);}
+  if(count(130)<30)A.give(130,40);if(X.world==="war"&&count(138)<60)A.give(138,80);
+}
+function giveKit(){
+  const g=A.give;g(129,1);g(130,90);g(133,4);
+  if(X.world==="zombie"){g(160,1);g(137,24);g(156,1);g(138,120);}
+  else{g(157,1);g(138,220);g(180,4);g(133,3);}
+  A.refreshHotbar();A.updateHUD(true);
+}
+function startChaos(kind){
+  wrapWorld();MP.noSave=true;X.world=kind;X.pz={poison:0,burn:0,slow:0,shock:0};zp.length=0;zc.length=0;
+  const sb=document.querySelector('#modeRow button[data-m="survival"]');if(sb)sb.click();
+  seed=Math.floor(Math.random()*1e9);edits={};generate();chunks.forEach(c=>{c.dirty=true;});spawn();EX.newWorld();
+  P.x=X.sp[0];P.y=X.sp[1]+.5;P.z=X.sp[2];P.vx=P.vy=P.vz=0;P.yaw=kind==="war"?-Math.PI/2:0;
+  S.mode="survival";giveKit();
+  if(!X.nwHook){X.nwHook=1;const nb=$$("newWorld");if(nb)nb.addEventListener("click",e=>{if(chaosOn()){e.stopImmediatePropagation();e.preventDefault();location.reload();}},true);}
+  panels.chs.close();startGame();
+  chip(kind==="zombie"?"🧟 Bertahan hidup! Cari makanan di minimarket":"🪖 Rebut bendera musuh 3 kali!");
+}
+function chaosPanel(){
+  const b=panels.chs.body;b.innerHTML="";
+  const card=(h,p,k)=>{const c=el("div",{class:"rrow",style:"flex-direction:column;align-items:stretch;gap:6px"},b);el("b",{text:h},c);el("small",{text:p,style:"white-space:normal;line-height:1.35"},c);const bt=el("button",{text:"Mulai",style:"padding:12px;font-size:16px"},c);bt.addEventListener("click",()=>{SFX.click();startChaos(k);});};
+  card("🧟 Kota Zombie Apokalips","Kota besar dengan 23 jenis zombie (gendut asam, runner, muntah darah, penjerit, tank, ratu, raksasa…). Cari makanan di minimarket, bertahan selama mungkin.","zombie");
+  card("🪖 Perang Parit 50 vs 50","Peta luas penuh parit. Rebut bendera musuh 3 kali sebelum mereka merebut bendera kita. Pasukan pintar: medis, granat, penembak jitu, perebut bendera.","war");
+  el("small",{text:"Dunia Chaos tidak disimpan. Muat ulang halaman untuk kembali ke dunia biasa.",style:"display:block;margin-top:8px;opacity:.7"},b);
+}
+
+SFX.eat=function(){
+  for(let i=0;i<6;i++){const t=i*.17+rnd(0,.04),p=(i%2?.3:-.3);A.noise(rnd(.05,.09),"bandpass",rnd(1500,3300),rnd(700,1400),.75,p,t);A.noise(.12,"lowpass",700,260,.55,p*.5,t);A.noise(.02,"highpass",5000,3500,.3,p,t+.02);}
+  A.tone("sine",190,80,.2,.4,0,1.15);A.noise(.12,"bandpass",900,500,.3,0,1.17);S.eatCd=Math.max(S.eatCd,1.3);
+};
+
 /* ================= Update per frame ================= */
 function update(dt){
   mpTick(dt);
-  if(S.dead)X.wasDead=true;else if(X.wasDead){X.wasDead=false;resetW();}
+  if(S.dead)X.wasDead=true;else if(X.wasDead){X.wasDead=false;resetW();chaosRespawn();}
   if(typeof started!=="undefined"&&!started)return;
-  woundTick(dt);raidTick(dt);
+  woundTick(dt);raidTick(dt);chaosTick(dt);
   updP(dt);updG(dt);tickFx(dt);vehicleStep(dt);
   if(!S.atkHeld)X.holdFire=false;
   if(X.alertT>0)X.alertT-=dt;
@@ -1402,5 +1788,5 @@ function renderChat(){
 function init(){initUI();}
 const crCount=id=>GR[id]?(X.cr[id]||64):0;
 return{crCount,ai,preHurt,blood,kill,use,attack,weapon,driving,update,hudKey,gunInfo,infoExtra,save,load,newWorld,populate,init,tiles,icon,describe,onGive,drawChar,hotExtra,drawPlayer,emit,emitSky,gen,noSave:()=>MP.noSave,
-  dbg:{MP,onMsg,mpHost,mpJoin,mpStart,mpRay,hitPlayer,aggro,renderLook,applyPreset,PRESETS,openChest:openChest,W:()=>X.w,X,DV,SHOPS,get BASE(){return BASE;},LOOT,SHELF,GUN,GR,fire,throwG,explode,spawnVeh,mount,dismount,openChest,takeShelf,openShop,feed,fishUse,catchFish,ignite,ptc,grens,VEH,renderShop}};
+  chaos:chaosOn,dbg:{startChaos,ZT,get WR(){return WR},get ZS(){return ZS},zAI,MP,onMsg,mpHost,mpJoin,mpStart,mpRay,hitPlayer,aggro,renderLook,applyPreset,PRESETS,openChest:openChest,W:()=>X.w,X,DV,SHOPS,get BASE(){return BASE;},LOOT,SHELF,GUN,GR,fire,throwG,explode,spawnVeh,mount,dismount,openChest,takeShelf,openShop,feed,fishUse,catchFish,ignite,ptc,grens,VEH,renderShop}};
 })();
