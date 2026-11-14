@@ -992,7 +992,7 @@ function update(dt){
     if(g<1)mobs.push(makeMob("golem",VIL.x+3,VIL.y+0.02,VIL.z+4));}}
   S.spawnT-=dt;if(S.spawnT<=0){S.spawnT=1.5;let pc=0;for(const m of mobs)if(!HOSTILEX[m.type])pc++;if(pc<44)spawnHerd(40,95);}
   S.zSpawnT-=dt;if(S.zSpawnT<=0){S.zSpawnT=2.5;if(DAY.night&&surv&&countType("spider")<4){for(let k=0;k<6;k++){const a=Math.random()*6.283,d=rnd(18,40);if(spawnAt("spider",P.x+Math.cos(a)*d,P.z+Math.sin(a)*d))break;}}
-  if(DAY.night&&surv&&countType("zombie")<6){for(let k=0;k<10;k++){const fa=Math.atan2(-Math.cos(P.yaw),-Math.sin(P.yaw)),a=Math.random()<0.7?fa+(Math.random()-0.5)*1.6:Math.random()*6.283,d=rnd(28,44);if(spawnAt("zombie",P.x+Math.cos(a)*d,P.z+Math.sin(a)*d))break;}}}
+  if(DAY.night&&surv&&countType("zombie")<EX2.zcap()){for(let k=0;k<10;k++){const fa=Math.atan2(-Math.cos(P.yaw),-Math.sin(P.yaw)),a=Math.random()<0.7?fa+(Math.random()-0.5)*1.6:Math.random()*6.283,d=rnd(28,44);if(spawnAt("zombie",P.x+Math.cos(a)*d,P.z+Math.sin(a)*d))break;}}}
   EX2.update(dt);
   updateHUD(false);
   S.uiT-=dt;if(S.uiT<=0){S.uiT=0.5;updateClock();}
