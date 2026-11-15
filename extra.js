@@ -510,6 +510,7 @@ function killMob(m,byP){EX2.kill(m,byP);
 function pickMob(reach,pad,dir){
   const o=eyePos(),d=dir||lookDir();let best=null,bt=reach;
   for(const m of mobs){
+    if(m.carried||m.loaded)continue;
     const T=TYPES[m.type],lo=[m.x-T.r-pad,m.y-pad,m.z-T.r-pad],hi=[m.x+T.r+pad,m.y+T.h+pad,m.z+T.r+pad];
     let tmin=0,tmax=bt,ok=true;
     for(let k=0;k<3;k++){
@@ -533,8 +534,8 @@ function give(id,n,quiet){
   SFX.pick();if(!quiet)toast("+"+n+" "+NAMES[id]);refreshHotbar();updateHUD(true);
 }
 function take(id,n){S.inv[id]=Math.max(0,count(id)-n);if(!S.inv[id]){const i=S.hotS.indexOf(id);if(i>=0)S.hotS[i]=0;}}
-function armorId(){let b=0,bp=0;for(const id in ARMOR)if(count(id)>0&&ARMOR[id]>bp){bp=ARMOR[id];b=+id;}return b;}
-const armorPts=()=>S.mode==="survival"?(ARMOR[armorId()]||0):0;
+function armorId(){const w=EX2.worn();if(w&&ARMOR[w])return w;let b=0,bp=0;for(const id in ARMOR)if(count(id)>0&&ARMOR[id]>bp){bp=ARMOR[id];b=+id;}return b;}
+const armorPts=()=>(S.mode==="survival"||EX2.worn())?(ARMOR[armorId()]||0):0;
 const heldDmg=()=>S.mode==="creative"?99:(TOOL[held()]?TOOL[held()].d:1);
 function blockOf(it){
   if(PLAIN.has(it))return it;
@@ -991,7 +992,7 @@ function update(dt){
     for(;v<4;v++){const h=VIL.homes[v%4],m=makeMob("villager",h[0]+0.5,VIL.y+0.02,h[1]+0.5);m.hi=v;mobs.push(m);}
     if(g<1)mobs.push(makeMob("golem",VIL.x+3,VIL.y+0.02,VIL.z+4));}}
   S.spawnT-=dt;if(S.spawnT<=0){S.spawnT=1.5;let pc=0;for(const m of mobs)if(!HOSTILEX[m.type])pc++;if(pc<44)spawnHerd(40,95);}
-  S.zSpawnT-=dt;if(S.zSpawnT<=0){S.zSpawnT=2.5;if(DAY.night&&surv&&countType("spider")<4){for(let k=0;k<6;k++){const a=Math.random()*6.283,d=rnd(18,40);if(spawnAt("spider",P.x+Math.cos(a)*d,P.z+Math.sin(a)*d))break;}}
+  S.zSpawnT-=dt;if(S.zSpawnT<=0){S.zSpawnT=2.5;if(DAY.night&&surv&&countType("spider")<1){for(let k=0;k<6;k++){const a=Math.random()*6.283,d=rnd(18,40);if(spawnAt("spider",P.x+Math.cos(a)*d,P.z+Math.sin(a)*d))break;}}
   if(DAY.night&&surv&&countType("zombie")<EX2.zcap()){for(let k=0;k<10;k++){const fa=Math.atan2(-Math.cos(P.yaw),-Math.sin(P.yaw)),a=Math.random()<0.7?fa+(Math.random()-0.5)*1.6:Math.random()*6.283,d=rnd(28,44);if(spawnAt("zombie",P.x+Math.cos(a)*d,P.z+Math.sin(a)*d))break;}}}
   EX2.update(dt);
   updateHUD(false);
@@ -1144,7 +1145,7 @@ function init(){
 }
 return{
   get flying(){return S.flying;},S,mobs:()=>mobs,
-  api:{S,TYPES,NAMES,TOOL,FOOD,SMELT,FUEL,HARD,PLAIN,PD,RECIPES,CAT_IDS,CATS,PASSIVE,HOSTILEX,SFX,B,emitBox,makeMob,spawnAt,groundY,mhit,mobs:()=>mobs,setMobs:a=>{mobs=a;},
+  api:{ARMOR,S,TYPES,NAMES,TOOL,FOOD,SMELT,FUEL,HARD,PLAIN,PD,RECIPES,CAT_IDS,CATS,PASSIVE,HOSTILEX,SFX,B,emitBox,makeMob,spawnAt,groundY,mhit,mobs:()=>mobs,setMobs:a=>{mobs=a;},
     give,take,count,hurtPlayer,hurtMob,killMob,pickMob,spat,tone,noise,toast,flash,updateHUD,refreshHotbar,renderInv,held,eyePos,iconCanvas,eatItem,armorPts,countType,nearTable,bestFood,
     ac:()=>ac,master:()=>master,noiseBuf:()=>noiseBuf,VIL:()=>VIL,
     pauseOn:()=>{S.paused=true;S.mining=false;mineUp();S.atkHeld=false;input.fx=input.fz=0;if(document.exitPointerLock)document.exitPointerLock();},pauseOff:()=>{S.paused=false;},savePlayer},

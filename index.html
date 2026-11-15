@@ -58,8 +58,8 @@
   </div>
 </div>
 
-<script src="extra.js?v=1794655920"></script>
-<script src="extra2.js?v=1794655920"></script>
+<script src="extra.js?v=1794725845"></script>
+<script src="extra2.js?v=1794725845"></script>
 <script>
 "use strict";
 /* ---------- Konstanta dunia ---------- */
@@ -76,9 +76,9 @@ function solid(x,y,z){ if(x<0||z<0||x>=W||z>=D||y<0) return true; if(y>=H) retur
 /* ---------- Simpan ---------- */
 const KEY="dunia-kotak-v2";
 let seed=(Math.random()*90000|0)+1, edits={};
-try{ const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s&&s.seed){seed=s.seed;edits=s.edits||{};} }catch(e){}
+try{ const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s&&s.seed){seed=s.seed;edits=(s.v===3)?(s.edits||{}):{};} }catch(e){}
 let saveT=0;
-function save(){ clearTimeout(saveT); saveT=setTimeout(()=>{ try{localStorage.setItem(KEY,JSON.stringify({seed,edits}));}catch(e){} },600); }
+function save(){ clearTimeout(saveT); saveT=setTimeout(()=>{ try{localStorage.setItem(KEY,JSON.stringify({v:3,seed,edits}));}catch(e){} },600); }
 
 /* ---------- Pembangkit dunia ---------- */
 function hash(x,z,s){ let h=Math.imul(x,374761393)+Math.imul(z,668265263)+Math.imul(s,1442695041)|0;
