@@ -33,7 +33,7 @@ const RECIPES=[
  {out:117,n:1,cost:{8:3,108:2},table:1,cat:"Alat"},{out:118,n:1,cost:{3:3,108:2},table:1,cat:"Alat"},{out:119,n:1,cost:{111:3,108:2},table:1,cat:"Alat"},
  {out:126,n:1,cost:{8:2,108:2},table:1,cat:"Alat"},{out:127,n:1,cost:{3:2,108:2},table:1,cat:"Alat"},{out:128,n:1,cost:{111:2,108:2},table:1,cat:"Alat"},
  {out:103,n:1,cost:{8:2,108:1},table:1,cat:"Senjata"},{out:104,n:1,cost:{3:2,108:1},table:1,cat:"Senjata"},{out:112,n:1,cost:{111:2,108:1},table:1,cat:"Senjata"},
- {out:129,n:1,cost:{111:2},table:1,cat:"Senjata"},{out:130,n:5,cost:{111:1},table:1,cat:"Senjata"},
+ {out:129,n:1,cost:{111:2},table:1,cat:"Senjata"},{out:130,n:500,cost:{111:1},table:1,cat:"Senjata"},
  {out:105,n:1,cost:{102:5},table:1,cat:"Armor"},{out:106,n:1,cost:{3:12},table:1,cat:"Armor"},{out:113,n:1,cost:{111:8},table:1,cat:"Armor"},
  {out:121,n:4,cost:{8:6},table:1,cat:"Blok"},{out:122,n:4,cost:{3:6},table:1,cat:"Blok"},{out:123,n:6,cost:{8:3},table:1,cat:"Blok"},{out:124,n:6,cost:{3:3},table:1,cat:"Blok"},
  {out:9,n:4,cost:{3:4},table:1,cat:"Blok"},{out:125,n:1,cost:{15:3,8:3},table:1,cat:"Blok"},{out:133,n:1,cost:{132:3},table:1,cat:"Lainnya"}];
@@ -265,13 +265,13 @@ function emitBox(m,p,sw,col){
     for(let k2=0;k2<6;k2++){const v=q[TRI[k2]]*3;mArr[mN++]=tmp[v];mArr[mN++]=tmp[v+1];mArr[mN++]=tmp[v+2];mArr[mN++]=r;mArr[mN++]=g;mArr[mN++]=b;}}
 }
 function initMobGL(){
-  const vs="attribute vec3 aPos;attribute vec3 aCol;uniform mat4 uM;uniform vec3 uEye;uniform vec2 uFog;varying vec3 vC;varying float vF;void main(){gl_Position=uM*vec4(aPos,1.0);vC=aCol;vF=clamp((distance(aPos,uEye)-uFog.x)/(uFog.y-uFog.x),0.0,1.0);}";
-  const fs="precision mediump float;uniform vec3 uSky;uniform float uBr;varying vec3 vC;varying float vF;void main(){gl_FragColor=vec4(mix(vC*uBr,uSky,vF),1.0);}";
+  const vs="attribute vec3 aPos;attribute vec3 aCol;uniform mat4 uM;uniform vec3 uEye;uniform vec2 uFog;varying vec3 vC;varying vec3 vP;varying float vF;void main(){gl_Position=uM*vec4(aPos,1.0);vP=aPos;vC=aCol;vF=clamp((distance(aPos,uEye)-uFog.x)/(uFog.y-uFog.x),0.0,1.0);}";
+  const fs="precision highp float;uniform vec3 uSky;uniform float uBr;uniform vec4 uLt[8];varying vec3 vC;varying vec3 vP;varying float vF;void main(){vec3 lt=vec3(0.0);for(int i=0;i<8;i++){float w=uLt[i].w;if(w>0.0){float k=clamp(1.0-distance(vP,uLt[i].xyz)/w,0.0,1.0);lt+=vec3(1.0,0.72,0.38)*k*k*1.1;}}gl_FragColor=vec4(mix(vC*(uBr+lt),uSky,vF),1.0);}";
   const mk=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(o));return o;};
   mprog=gl.createProgram();gl.attachShader(mprog,mk(gl.VERTEX_SHADER,vs));gl.attachShader(mprog,mk(gl.FRAGMENT_SHADER,fs));
   gl.bindAttribLocation(mprog,0,"aPos");gl.bindAttribLocation(mprog,1,"aCol");gl.linkProgram(mprog);
   if(!gl.getProgramParameter(mprog,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(mprog));
-  for(const n of["uM","uEye","uFog","uSky","uBr"])mU[n]=gl.getUniformLocation(mprog,n);
+  for(const n of["uM","uEye","uFog","uSky","uBr","uLt"])mU[n]=gl.getUniformLocation(mprog,n);
   mbuf=gl.createBuffer();
 }
 /* karakter pemain (kamera orang ketiga) */
@@ -294,7 +294,7 @@ function emitPlayer(){
 function flush(M,sky,fogOn,br){
   if(!mN)return;
   gl.useProgram(mprog);gl.uniformMatrix4fv(mU.uM,false,M);gl.uniform3f(mU.uEye,camPos[0],camPos[1],camPos[2]);
-  gl.uniform2f(mU.uFog,fogOn?46*DAY.fog:1e6,fogOn?92*DAY.fog:2e6);gl.uniform3f(mU.uSky,sky[0],sky[1],sky[2]);gl.uniform1f(mU.uBr,br);
+  gl.uniform2f(mU.uFog,fogOn?46*DAY.fog:1e6,fogOn?92*DAY.fog:2e6);gl.uniform3f(mU.uSky,sky[0],sky[1],sky[2]);gl.uniform1f(mU.uBr,br);gl.uniform4fv(mU.uLt,EX2.lightArr());
   gl.bindBuffer(gl.ARRAY_BUFFER,mbuf);gl.bufferData(gl.ARRAY_BUFFER,mArr.subarray(0,mN),gl.DYNAMIC_DRAW);
   gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,24,0);
   gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,24,12);
@@ -530,7 +530,7 @@ const held=()=>HOTBAR[sel]|0;
 function give(id,n,quiet){
   if(n<=0)return;if(!S.inv[id]&&S.order.indexOf(id)<0)S.order.push(id);
   S.inv[id]=(S.inv[id]|0)+n;if(typeof EX2!=="undefined")EX2.onGive(id,n);
-  if(S.mode==="survival"&&S.hotS.indexOf(id)<0){const e=S.hotS.indexOf(0);if(e>=0)S.hotS[e]=id;}
+  if(S.hotS.indexOf(id)<0){const e=S.hotS.indexOf(0);if(e>=0)S.hotS[e]=id;}
   SFX.pick();if(!quiet)toast("+"+n+" "+NAMES[id]);refreshHotbar();updateHUD(true);
 }
 function take(id,n){S.inv[id]=Math.max(0,count(id)-n);if(!S.inv[id]){const i=S.hotS.indexOf(id);if(i>=0)S.hotS[i]=0;}}
@@ -676,6 +676,7 @@ function muzzle(){const m=$$("mflash");m.style.transition="none";m.style.opacity
 
 /* ---------- Aksi pemain ---------- */
 function hurtPlayer(dmg,sx,sz){
+  if(armorId()===247&&S.mode==="survival")return;
   if(S.mode!=="survival"||S.dead||(S.hurtT>0&&sx!==undefined))return;
   const d=Math.max(1,Math.round(dmg*(1-0.03*armorPts())));
   S.hp=Math.max(0,S.hp-d);S.hurtT=0.7;flash();SFX.hurt();
@@ -773,6 +774,7 @@ function leftDown(){
 const furn=new Map(),crops=new Map();
 function getF(key){if(!furn.has(key))furn.set(key,{inp:null,fuel:null,out:null,burn:0,burnMax:0,prog:0});return furn.get(key);}
 function onBlock(old,nw,x,y,z){
+  EX2.onBlk(old,nw,x,y,z);
   const key=idx(x,y,z),so=old!==AIR&&old!==WATER,sn=nw!==AIR&&nw!==WATER,oc=old>=41&&old<=44,nc=nw>=41&&nw<=44;
   if(so&&!sn){
     SFX.break(old);
@@ -901,7 +903,7 @@ function moveToFurn(id){
 /* ---------- Waktu & dunia ---------- */
 function updateDay(){
   const hour=(6+DAY.tod*24)%24,e=Math.sin(2*Math.PI*(hour-6)/24);
-  DAY.dayf=clamp((e+0.12)/0.42,0,1);DAY.br=0.3+0.7*DAY.dayf;DAY.fog=0.6+0.4*DAY.dayf;DAY.night=DAY.dayf<0.3;
+  DAY.dayf=clamp((e+0.12)/0.42,0,1);DAY.br=((typeof EX2!=="undefined"&&EX2.cityOn&&EX2.cityOn())?0.42:0.3)+(typeof EX2!=="undefined"&&EX2.cityOn&&EX2.cityOn()?0.58:0.7)*DAY.dayf;DAY.fog=0.6+0.4*DAY.dayf;DAY.night=DAY.dayf<0.3;
   const dusk=Math.max(0,1-Math.abs(e)/0.2),dc=[0.53,0.75,0.95],nc=[0.02,0.03,0.09],oc=[0.95,0.5,0.3];
   for(let i=0;i<3;i++){const b=nc[i]+(dc[i]-nc[i])*DAY.dayf;DAY.sky[i]=b+(oc[i]-b)*dusk*0.55;}
 }

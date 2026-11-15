@@ -58,8 +58,8 @@
   </div>
 </div>
 
-<script src="extra.js?v=1794725845"></script>
-<script src="extra2.js?v=1794725845"></script>
+<script src="extra.js?v=1794727492"></script>
+<script src="extra2.js?v=1794727492"></script>
 <script>
 "use strict";
 /* ---------- Konstanta dunia ---------- */
@@ -152,11 +152,11 @@ function program(vs,fs){ const p=gl.createProgram(); gl.attachShader(p,shader(gl
 let prog,lprog,U={},LU={},chunks=[],lineBuf;
 function initGL(){
   prog=program(`attribute vec3 aPos;attribute vec2 aUv;attribute float aL;uniform mat4 uM;uniform vec3 uEye;uniform vec2 uFog;
-    varying vec2 vUv;varying float vL;varying float vF;
-    void main(){gl_Position=uM*vec4(aPos,1.0);vUv=aUv;vL=aL;vF=clamp((distance(aPos,uEye)-uFog.x)/(uFog.y-uFog.x),0.0,1.0);}`,
-   `precision mediump float;uniform sampler2D uT;uniform vec3 uSky;uniform float uBr;varying vec2 vUv;varying float vL;varying float vF;
-    void main(){vec4 c=texture2D(uT,vUv);if(c.a<0.1)discard;gl_FragColor=vec4(mix(c.rgb*vL*uBr,uSky,vF),c.a);}`);
-  for(const n of["uM","uEye","uFog","uT","uSky","uBr"]) U[n]=gl.getUniformLocation(prog,n);
+    varying vec2 vUv;varying float vL;varying float vF;varying vec3 vP;
+    void main(){gl_Position=uM*vec4(aPos,1.0);vP=aPos;vUv=aUv;vL=aL;vF=clamp((distance(aPos,uEye)-uFog.x)/(uFog.y-uFog.x),0.0,1.0);}`,
+   `precision highp float;uniform sampler2D uT;uniform vec3 uSky;uniform float uBr;uniform vec4 uLt[8];varying vec2 vUv;varying float vL;varying float vF;varying vec3 vP;
+    void main(){vec4 c=texture2D(uT,vUv);if(c.a<0.1)discard;vec3 lt=vec3(0.0);for(int i=0;i<8;i++){float w=uLt[i].w;if(w>0.0){float k=clamp(1.0-distance(vP,uLt[i].xyz)/w,0.0,1.0);lt+=vec3(1.0,0.72,0.38)*k*k*1.1;}}gl_FragColor=vec4(mix(c.rgb*(vL*uBr+lt*(0.45+0.55*vL)),uSky,vF),c.a);}`);
+  for(const n of["uM","uEye","uFog","uT","uSky","uBr","uLt"]) U[n]=gl.getUniformLocation(prog,n);
   U.aPos=gl.getAttribLocation(prog,"aPos");U.aUv=gl.getAttribLocation(prog,"aUv");U.aL=gl.getAttribLocation(prog,"aL");
   lprog=program(`attribute vec3 aPos;uniform mat4 uM;uniform vec3 uO;void main(){gl_Position=uM*vec4(aPos+uO,1.0);}`,
     `precision mediump float;void main(){gl_FragColor=vec4(0.05,0.05,0.05,1.0);}`);
@@ -292,7 +292,7 @@ function render(){
   const rx=[1,0,0,0, 0,cp,sp,0, 0,-sp,cp,0, 0,0,0,1], ry=[cy,0,-sy,0, 0,1,0,0, sy,0,cy,0, 0,0,0,1], tr=[1,0,0,0, 0,1,0,0, 0,0,1,0, -vx,-vy,-vz,1];
   const M=mul(pr,mul(rx,mul(ry,tr)));
   gl.useProgram(prog); gl.uniformMatrix4fv(U.uM,false,M); gl.uniform3f(U.uEye,vx,vy,vz);
-  gl.uniform2f(U.uFog,under?1:46*DAY.fog,under?16:92*DAY.fog); gl.uniform3f(U.uSky,sky[0],sky[1],sky[2]); gl.uniform1i(U.uT,0); gl.uniform1f(U.uBr,DAY.br);
+  gl.uniform2f(U.uFog,under?1:46*DAY.fog,under?16:92*DAY.fog); gl.uniform3f(U.uSky,sky[0],sky[1],sky[2]); gl.uniform1i(U.uT,0); gl.uniform1f(U.uBr,DAY.br); gl.uniform4fv(U.uLt,EX2.lightArr());
   gl.enableVertexAttribArray(U.aPos);gl.enableVertexAttribArray(U.aUv);gl.enableVertexAttribArray(U.aL);
   const bind=b=>{ gl.bindBuffer(gl.ARRAY_BUFFER,b); gl.vertexAttribPointer(U.aPos,3,gl.FLOAT,false,24,0);
     gl.vertexAttribPointer(U.aUv,2,gl.FLOAT,false,24,12); gl.vertexAttribPointer(U.aL,1,gl.FLOAT,false,24,20); };

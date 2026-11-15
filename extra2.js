@@ -65,7 +65,7 @@ C.Semua=[].concat(C.Blok,C.Alat,C.Senjata,C.Granat,C.Armor,C.Lainnya);
    160:{111:7,8:4},161:{111:9,8:5},162:{111:8,8:4,109:1},163:{111:24,109:6},164:{111:16,109:4},165:{111:6,10:3,109:2},166:{111:12,10:5,109:3},167:{111:6,10:2,109:1},168:{111:6,109:4},
    169:{111:6,109:2,132:2},170:{111:8,10:3,109:3},171:{111:30,10:8,109:8},172:{111:4,15:3},173:{111:4,101:3,132:2}};
   for(const id in gc)R(+id,1,gc[id],"Senjata");
-  R(137,4,{111:1,109:1},"Senjata");R(138,10,{111:1,109:1},"Senjata");R(139,6,{111:1,10:1},"Senjata");
+  R(137,500,{111:1,109:1},"Senjata");R(138,500,{111:1,109:1},"Senjata");R(139,500,{111:1,10:1},"Senjata");
   const gr={180:{111:2,109:2},181:{111:1,109:1,4:2},182:{111:1,10:2},183:{111:1,109:3},184:{111:1,15:1,10:1},185:{111:2,109:2,102:1},186:{111:3,109:1},187:{111:1,109:1,132:2},188:{111:1,15:2,109:1},189:{111:1,109:1,101:2}};
   for(const id in gr)R(+id,1,gr[id],"Granat");
   R(18,2,{109:4,4:4},"Blok");R(19,1,{8:8},"Blok");R(20,2,{8:4},"Blok");R(21,1,{15:4,111:2},"Blok");
@@ -89,8 +89,9 @@ function tiles(g){
   T(36,(x,y,n)=>(x===0||y===0)?v([150,152,156],n-.5,10):v([186,188,192],n-.5,12));
   T(37,(x,y,n)=>(x>5&&x<10&&y<9)?v([235,200,50],n-.5,12):v([52,53,58],n-.5,16));
   T(38,(x,y,n)=>(x%8===0||y%8===0)?v([150,148,142],n-.5,8):v([200,196,186],n-.5,12));
+  T(40,(x,y,n)=>{const e=x<1||y<1||x>14||y>14;if(e)return v([150,90,20],n,10);const d=Math.hypot(x-7.5,y-7.5);return d<4?[255,250,200]:v([255,190,60],n,25);});
   T(39,(x,y,n)=>{const e=x<2||y<2||x>13||y>13;if((x===3||x===12)&&(y===3||y===12))return[220,220,230];if(x>=6&&x<=9&&y>=6&&y<=9)return v([210,170,50],n-.5,20);return v(e?[70,76,86]:[110,118,130],n-.5,14);});
-  Object.assign(TILES,{18:[29,28,29],19:[31,30,31],20:[9,32,9],21:[33,34,34],22:[35,35,35],23:[36,36,36],24:[37,37,37],25:[38,38,38],26:[39,39,39]});
+  Object.assign(TILES,{18:[29,28,29],19:[31,30,31],20:[9,32,9],21:[33,34,34],22:[35,35,35],23:[36,36,36],24:[37,37,37],25:[38,38,38],26:[39,39,39],27:[40,40,40]});
 }
 
 /* ================= Ikon barang ================= */
@@ -133,7 +134,7 @@ function describe(id){
    195:"Mobil · tekan Pasang untuk menaruh",196:"Jip · tekan Pasang untuk menaruh",197:"Motor · tekan Pasang untuk menaruh",198:"Truk · tekan Pasang untuk menaruh",199:"Skateboard · Lompat = ollie",18:"TNT · tekan Pasang pada TNT untuk menyalakan",19:"Peti",20:"Rak toko",21:"Trampolin · pantulkan dirimu",137:"Peluru shotgun",138:"Peluru senapan",139:"Sel energi · amunisi senjata energi"};
   return D[id]||null;
 }
-function gunInfo(h,surv){const g=GUN[h];if(g)return" · 🔫 "+(surv?count(g.ammo):"∞");if(GR[h])return" · 💣 "+(surv?count(h):"∞");return"";}
+function gunInfo(h,surv){const g=GUN[h];if(g)return" · 🔫 "+(surv&&!g.inf?count(g.ammo):"∞");if(GR[h])return" · 💣 "+(surv?count(h):"∞");return"";}
 const weapon=()=>{const h=A.held();return !!(GUN[h]||GR[h]);};
 
 /* ================= Suara ================= */
@@ -635,6 +636,7 @@ const PEND2={};
 function mflash(){const m=$$("mflash");if(!m)return;m.style.transition="none";m.style.opacity=1;requestAnimationFrame(()=>requestAnimationFrame(()=>{m.style.transition="opacity .12s";m.style.opacity=0;}));}
 function dryClick(){A.tone("square",900,600,.03,.12);}
 function fire(g){
+  if(g.rocket){rocketFire(g);return;}
   V3.loud=Math.max(V3.loud,1.3);const surv=S.mode==="survival";
   if(surv&&count(g.ammo)<=0){S.atkCd=.4;dryClick();A.toast("Amunisi habis: "+AMMO[g.ammo]);return;}
   if(surv){A.take(g.ammo,1);if(count(g.ammo)<=0)A.refreshHotbar();A.updateHUD(true);}
@@ -714,6 +716,7 @@ function detonate(g){
   switch(gr.id){
     case 180:explode(x,y,z,4.6,45,2,{byP:!g.ai});track("boom");break;
     case 240:nuke(x,y,z);break;
+    case 248:hiro(x,y,z);break;
     case 185:explode(x,y,z,3.8,62,1.5,{byP:true});track("boom");break;
     case 181:zones.push({kind:"smoke",x,y,z,t:8});shotSound("smallboom",.4,spatial(x,z)[0]);break;
     case 182:{const dx=x-P.x,dz=z-P.z,dist=Math.hypot(dx,dz),f=lookDir(),facing=(dx*f[0]+dz*f[2])/(dist||1);
@@ -875,7 +878,7 @@ function takeShelf(t){
   A.give(sh.item,sh.n);
 }
 const WARES={warung:[{id:133,n:1,p:6},{id:107,n:1,p:8},{id:194,n:1,p:7},{id:132,n:3,p:6},{id:131,n:3,p:4}],
- senjata:[{id:130,n:10,p:18},{id:137,n:6,p:24},{id:138,n:15,p:32},{id:139,n:10,p:36},{id:150,n:1,p:110},{id:160,n:1,p:190},{id:180,n:1,p:55},{id:182,n:1,p:40}],
+ senjata:[{id:130,n:500,p:18},{id:137,n:500,p:24},{id:138,n:500,p:32},{id:139,n:500,p:36},{id:150,n:1,p:110},{id:160,n:1,p:190},{id:180,n:1,p:55},{id:182,n:1,p:40}],
  alat:[{id:116,n:1,p:90},{id:119,n:1,p:90},{id:128,n:1,p:60},{id:192,n:1,p:25},{id:190,n:1,p:70},{id:191,n:1,p:250},{id:197,n:1,p:180}]};
 WARES.mega=[].concat(WARES.warung,WARES.senjata,WARES.alat);
 const SELL={111:8,132:2,101:2,107:3,15:3,193:2,194:4,109:3,102:3,8:1,3:1};
@@ -909,7 +912,7 @@ function npcShoot(m,dist,kind,dmg,acc){
   shotAt(kind,m.x,m.z,1.5);
   if(Math.random()<clamp(acc-dist*.018,.12,.8)){
     if(DV.m&&!VEH[DV.m.type].animal){DV.m.hp-=dmg*2;DV.m.hurt=.2;burst(P.x,P.y+1,P.z,5,4,()=>[1,.8,.3],.07,.4,{g:16});}
-    else hitPlayer(dmg,m.x,m.z,kind);
+    else{hitPlayer(dmg,m.x,m.z,kind);V3.atkM=m;V3.atkT=8;}
   }
 }
 /* ================= Perang antar pasukan ================= */
@@ -991,7 +994,7 @@ function renderWounds(){
   bl.className=w.eye===1?"L on":w.eye===2?"R on":"";
 }
 function hitPlayer(dmg,sx,sz,kind,forceR){
-  if(S.mode!=="survival"||S.dead)return;const w=X.w,hp0=S.hp,ap=A.armorPts(),big=(kind==="shotgun"||kind==="mini")?1.3:1;
+  if(S.mode!=="survival"||S.dead||A.armorPts()>=40)return;const w=X.w,hp0=S.hp,ap=A.armorPts(),big=(kind==="shotgun"||kind==="mini")?1.3:1;
   let reg=Math.random(),R=forceR||(reg<.1?"head":reg<.55?"torso":reg<.75?"arm":"leg");
   if(R==="head"&&ap>=10&&Math.random()<.5)R="torso";
   if(R==="head"){
@@ -1108,6 +1111,7 @@ function attack(){
 function use(){
   if(DV.m)return true;
   const h=A.held(),hit=A.pickMob(3.8,.2);
+  if(EGGBY[h]){spawnEgg(h);return true;}
   if(V3.carry)return carryUse(hit,h);
   if(A.ARMOR[h]){wearToggle(h);return true;}
   if(hit){const m=hit.m,t=m.type;
@@ -1139,7 +1143,7 @@ function gen(){
   if(chaosOn()){chaosGen();return;}
   const S3=(x,y,z,id)=>{if(x>=0&&z>=0&&x<W&&z<D&&y>=0&&y<H)blocks[idx(x,y,z)]=id;};
   const vil=A.VIL(),vx=vil?vil.x:128,vz=vil?vil.z:128;
-  CITY=cityGen();
+  CITY=cityGen();cityLamps();lampScan=false;
   const flat=(cx,cz,rx,rz,bad0)=>{let mn=99,mx=0,bad=0;for(let dz=-rz;dz<=rz;dz+=4)for(let dx=-rx;dx<=rx;dx+=4){const x=cx+dx,z=cz+dz;if(x<2||z<2||x>=W-2||z>=D-2)return null;const h=hm[z*W+x];if(h<=SEA+2){if(++bad>(bad0||0))return null;continue;}mn=Math.min(mn,h);mx=Math.max(mx,h);}return mx-mn;};
   const level=(cx,cz,rx,rz,h0,top)=>{for(let z=cz-rz;z<=cz+rz;z++)for(let x=cx-rx;x<=cx+rx;x++){for(let y=0;y<=top;y++){const i=idx(x,y,z);if(y<h0-1){if(blocks[i]===AIR||blocks[i]===WATER)blocks[i]=y>=h0-4?DIRT:STONE;}else if(y===h0-1)blocks[i]=GRASS;else blocks[i]=AIR;}hm[z*W+x]=h0;}};
   // ---- markas ----
@@ -1815,20 +1819,20 @@ function openHostScreen(){
 function setMode(m){const bt=document.querySelector('#modeRow button[data-m="'+m+'"]');if(bt)bt.click();}
 function emoPanel(){
   const b=panels.emo.body;b.innerHTML="";
-  {const t18=el("button",{text:X.ok18?"🔞 Mode 18+ AKTIF (ketuk untuk matikan)":"🔞 Aktifkan Mode 18+ (saya 18 tahun ke atas)",style:"width:100%;padding:12px;margin-bottom:8px;background:"+(X.ok18?"#7a3030":"#3a4b60")},b);
+  if(0){const t18=el("button",{text:X.ok18?"🔞 Mode 18+ AKTIF (ketuk untuk matikan)":"🔞 Aktifkan Mode 18+ (saya 18 tahun ke atas)",style:"width:100%;padding:12px;margin-bottom:8px;background:"+(X.ok18?"#7a3030":"#3a4b60")},b);
    t18.addEventListener("click",()=>{X.ok18=!X.ok18;chip(X.ok18?"🔞 Mode 18+ aktif · emote 18+ terbuka":"Mode 18+ dimatikan");emoPanel();});}
   if(V.em){const s=el("button",{text:"⏹ Berhenti",style:"width:100%;padding:12px;margin-bottom:8px;background:#7a3030"},b);s.addEventListener("click",()=>{stopEmote();panels.emo.close();});}
   const g=el("div",{style:"display:grid;grid-template-columns:1fr 1fr;gap:8px"},b);
-  for(const e of EMO){const lock=e[2]&&!X.ok18;const x=el("button",{text:e[1]+(lock?" (18+)":""),style:"padding:14px 6px;font-size:15px"+(lock?";opacity:.45":"")},g);
+  for(const e of EMO){const lock=false;const x=el("button",{text:e[1]+(lock?" (18+)":""),style:"padding:14px 6px;font-size:15px"+(lock?";opacity:.45":"")},g);
     x.addEventListener("click",()=>{if(lock){chip("Butuh gerbang 18+ diaktifkan");return;}SFX.click();panels.emo.close();startEmote(e[0]);});}
 }
 function v22Init(){
-  makePanel("hw","🌍 Buat Dunia");makePanel("emo","😀 Emote");
+  makePanel("hw","🌍 Buat Dunia");makePanel("emo","😀 Emote");makePanel("modp","🧰 Mod");
   {const tb0=$$("tbs"),db=el("button",{id:"tbDrop",class:"tb",text:"⬇"},tb0);let dtm=null,fired=false;
    const dn=ev=>{ev.preventDefault();ev.stopPropagation();fired=false;clearTimeout(dtm);dtm=setTimeout(()=>{fired=true;dropHeld(true);},550);};
    const up=ev=>{ev.preventDefault();ev.stopPropagation();clearTimeout(dtm);if(!fired)dropHeld(false);fired=false;};
    db.addEventListener("touchstart",dn,{passive:false});db.addEventListener("touchend",up,{passive:false});db.addEventListener("mousedown",dn);db.addEventListener("mouseup",up);}
-  const tbs=$$("tbs"),eb=el("button",{id:"tbEmo",class:"tb sec",text:"😀"},tbs);eb.addEventListener("click",()=>{emoPanel();panels.emo.open();});
+  const tbs=$$("tbs"),eb=el("button",{id:"tbEmo",class:"tb sec",text:"😀"},tbs);eb.addEventListener("click",()=>{emoPanel();panels.emo.open();});{const mb=el("button",{id:"tbMod",class:"tb sec",text:"🧰"},tbs);mb.addEventListener("click",()=>{modPanel();panels.modp.open();});}
 }
 function v22Tick(dt){drinkTick(dt);drunkTick(dt);emoteTick(dt);barTick(dt);}
 const zcap=()=>[0,1,1,2][X.diff===undefined?2:X.diff];
@@ -2233,6 +2237,7 @@ function bDepot(h0){
 }
 /* ---- ikon & deskripsi ---- */
 function iconV3(g,id){
+  if(iconV3b(g,id))return true;
   switch(id){
     case 240:for(let y=3;y<=14;y++)for(let x=3;x<=13;x++){const d=Math.hypot(x-8,y-9);if(d<5.3)px(g,d>4.2?"#7a7a10":"#e8e020",x,y);}px(g,"#111",7,8,2,2);px(g,"#111",5,6,2,1);px(g,"#111",9,6,2,1);px(g,"#111",7,11,2,1);px(g,"#777",7,2,3,2);px(g,"#d33",10,2,3,1);return true;
     case 241:for(let k=0;k<3;k++){px(g,"#b9955a",3+k,6+k*2,10-k*2,1);px(g,"#8a6a38",3+k,7+k*2,10-k*2,1);}px(g,"#b9955a",2,5,1,8);px(g,"#b9955a",13,5,1,8);px(g,"#d8b878",12,13,3,1);return true;
@@ -2244,6 +2249,7 @@ function iconV3(g,id){
   return false;
 }
 function descV3(id){
+  {const q=descV3b(id);if(q)return q;}
   const D={240:"Granat Nuklir · tekan Serang untuk melempar · ledakan dahsyat + awan jamur, jauhi!",241:"Tali · tekan Pasang pada orang untuk mengikat · Pasang lagi pada badannya untuk memanggul",242:"Pisau · Serang = menyayat (luka & darah bocor) · Pasang = lempar, menancap",243:"Armor Baja (20) · tekan Pasang untuk memakai / melepas · tetap terpasang saat pindah mode",244:"Armor Titan (30) · tekan Pasang untuk memakai / melepas · tetap terpasang saat pindah mode",245:"Helikopter · tekan Pasang untuk menaruh · Lompat = naik, lepas = turun · Serang = senapan mesin",246:"Tank · tekan Pasang untuk menaruh · Serang = tembak meriam ke arah pandangan",
     22:"Aspal",23:"Beton",24:"Marka jalan",25:"Trotoar",26:"Pintu brankas · baja tebal"};
   return D[id]||null;
@@ -2269,7 +2275,7 @@ function itemsTick(dt){
     const dx=P.x-it.x,dz=P.z-it.z,d=Math.hypot(dx,dz),dy=it.y-(P.y+.7);
     if(it.t>it.pk&&!S.dead&&Math.abs(dy)<2.2){
       if(d<3&&d>.01){it.x+=dx/d*dt*5;it.z+=dz/d*dt*5;}
-      if(d<1.3){if(S.mode==="survival"){A.give(it.id,it.n,true);chip("+"+it.n+" "+(NAMES[it.id]||"Item"));}else if(it.id){chip("Diambil "+(NAMES[it.id]||"Item"));}
+      if(d<1.3){if(it.id){A.give(it.id,it.n,true);chip("+"+it.n+" "+(NAMES[it.id]||"Item"));}
         A.tone("sine",700,1100,.08,.2);V3.items.splice(i,1);}}
   }
 }
@@ -2369,8 +2375,8 @@ function nuke(x,y,z){
 }
 function nukeTick(dt){
   for(let i=V3.nukes.length-1;i>=0;i--){const n=V3.nukes[i];n.t+=dt;
-    const h=Math.min(n.t*13,32),cnt=Math.floor(dt*140);
-    for(let k=0;k<cnt;k++){const yy=n.y+rnd(0,h),st=rnd(0,1);addP(n.x+rnd(-1.6,1.6),yy,n.z+rnd(-1.6,1.6),rnd(-.6,.6),rnd(2,5),rnd(-.6,.6),rnd(.8,1.6),st<.45?[1,rnd(.45,.8),.1]:[.35,.33,.32],rnd(2,3.4),{g:-.5,fade:1,b:0});}
+    const kk=n.k||1,h=Math.min(n.t*13*kk,32*kk),cnt=Math.floor(dt*140*kk);
+    for(let k=0;k<cnt;k++){const yy=n.y+rnd(0,h),st=rnd(0,1);addP(n.x+rnd(-1.6,1.6)*kk,yy,n.z+rnd(-1.6,1.6)*kk,rnd(-.6,.6),rnd(2,5),rnd(-.6,.6),rnd(.8,1.6),st<.45?[1,rnd(.45,.8),.1]:[.35,.33,.32],rnd(2,3.4),{g:-.5,fade:1,b:0});}
     if(n.t>.5)for(let k=0;k<Math.floor(dt*160);k++){const a=Math.random()*6.283,r=rnd(3,9)*Math.min(1,(n.t-.5)*1.4);addP(n.x+Math.cos(a)*r*.5,n.y+h+rnd(-1,2),n.z+Math.sin(a)*r*.5,Math.cos(a)*r*.7,rnd(0,2),Math.sin(a)*r*.7,rnd(1,1.9),Math.random()<.5?[.9,.35,.08]:[.4,.38,.36],rnd(2,3),{g:-.2,fade:1,b:0});}
     if(n.s<1&&n.t>.45){n.s=1;explode(n.x,n.y,n.z,34,120,3,{byP:true,quiet:true});A.tone("sawtooth",50,30,1.8,.4);}
     if(n.s<2&&n.t>1.2){n.s=2;zones.push({kind:"fire",x:n.x,y:n.y,z:n.z,t:14});zones.push({kind:"poison",x:n.x,y:n.y,z:n.z,t:28});}
@@ -2485,6 +2491,7 @@ function pvAI(m,dt,dist,dx,dz){
 }
 function v23AI(m,dt,dist,dx,dz){
   const t=m.type;
+  if(m.ally&&ALLY[t])return allyV3AI(m,dt,dist,dx,dz);
   if(m.police&&VEH[t])return pvAI(m,dt,dist,dx,dz);
   if(t==="polisi")return policeAI(m,dt,dist,dx,dz);
   if(t.indexOf("warga")===0)return wargaAI(m,dt,dist,dx,dz);
@@ -2545,7 +2552,7 @@ function emitV3(){
   }
 }
 function v23Tick(dt){
-  V3.t+=dt;if(V3.loud>0)V3.loud-=dt;
+  V3.t+=dt;if(V3.loud>0)V3.loud-=dt;if(V3.atkT>0)V3.atkT-=dt;lightTick(dt);
   itemsTick(dt);knivesTick(dt);bleedTick(dt);nukeTick(dt);bodiesTick(dt);
   for(const m of A.mobs())if(m.type==="heli"){const spin=DV.m===m||m.police||!m.ground;m.rotV=(m.rotV||0)+((spin?30:0)-(m.rotV||0))*Math.min(1,dt*2);m.rotA=(m.rotA||0)+m.rotV*dt;}
   wantedTick(dt);
@@ -2580,9 +2587,135 @@ function blueAI(m,dt){
   if(hd>5)goToward(m,m.home[0],m.home[1]);
   else if(m.t<=0){m.moving=Math.random()<.4;m.yaw=Math.random()*6.283;m.t=rnd(1.5,4);}
 }
+/* ================= v2.3b: Mod, telur, sekutu, bazoka, Hirosima, obor ================= */
+Object.assign(NAMES,{247:"Armor Tuhan",248:"Bom Hirosima",249:"Pistol Bazoka",27:"Obor"});
+A.ARMOR[247]=40;C.Armor.push(247);
+GR[248]={id:248,n:"Bom Hirosima",fuse:4.2,col:[.95,.9,.75]};C.Granat.push(248);
+GUN[249]={id:249,n:"Pistol Bazoka",ammo:0,dmg:95,cd:.9,pel:1,spr:0,rng:150,snd:"rail",col:[.25,.32,.22],len:9,auto:0,fx:null,tc:[1,.5,.1],inf:1,rocket:1};
+AMMO[0]="tak terbatas";C.Senjata.push(249);C.Blok.push(27);A.PLAIN.add(27);A.HARD[27]=.2;
+const EGGS=[[250,"cow","Sapi",[.55,.35,.25]],[251,"sheep","Domba",[.9,.9,.9]],[252,"chicken","Ayam",[1,.9,.5]],[253,"pig","Babi",[.95,.6,.65]],[254,"horse","Kuda",[.45,.28,.15]],[255,"rabbit","Kelinci",[.8,.7,.6]],[256,"zombie","Zombie",[.35,.6,.35]],[257,"creeper","Creeper",[.3,.8,.3]],[258,"spider","Laba-laba",[.2,.2,.2]],[259,"villager","Warga Desa",[.6,.45,.35]],[260,"golem","Golem",[.7,.7,.7]],[261,"warga1","Warga Kota",[.3,.6,.8]],[262,"polisi","Polisi",[.15,.2,.5]],[263,"soldier","Prajurit Besi",[.3,.4,.25]],[264,"soldier2","Pasukan Biru",[.2,.35,.8]],[265,"fbi","FBI (sekutu)",[.05,.05,.1]],[266,"tentara","Tentara (sekutu)",[.3,.45,.2]],[267,"elit","Pasukan Elit (sekutu)",[.15,.15,.18]],[268,"frog","Kodok",[.3,.7,.3]]];
+const EGGBY={};for(const e of EGGS){EGGBY[e[0]]={type:e[1],n:e[2],col:e[3]};NAMES[e[0]]="Telur "+e[2];}
+C.Telur=EGGS.map(e=>e[0]);A.CATS.push("Telur");
+(function(){
+  const R=(out,n,cost,cat)=>A.RECIPES.push({out,n,cost,table:1,cat});
+  R(247,1,{111:90,10:24,109:40,140:300},"Armor");R(248,1,{111:60,109:60,10:20,15:20},"Granat");R(249,1,{111:40,109:20,8:6},"Senjata");R(27,4,{108:1,109:1},"Blok");
+})();
+const ALLY={fbi:{hp:90,dmg:9,cd:.34,acc:.88,rng:46,keep:14,sp:3.8},tentara:{hp:70,dmg:6,cd:.42,acc:.8,rng:42,keep:15,sp:3.4},elit:{hp:180,dmg:13,cd:.2,acc:.9,rng:56,keep:16,sp:4.4}};
+defHuman("fbi",{skin:[.85,.66,.52],helm:[.04,.04,.06],top:[.07,.07,.1],vest:[.04,.04,.06],pants:[.06,.06,.09],gun:1,glen:1.2,hat:[.04,.04,.06]},90,3.8,"shout");
+defHuman("tentara",{skin:[.8,.62,.48],helm:[.25,.35,.18],top:[.3,.42,.22],vest:[.2,.28,.14],pants:[.26,.36,.2],gun:1,glen:1.3},70,3.4,"shout");
+defHuman("elit",{k:1.12,skin:[.7,.55,.42],helm:[.1,.1,.12],top:[.13,.15,.13],vest:[.08,.09,.1],pants:[.1,.12,.1],gun:1,glen:1.5,visor:1},180,4.4,"shout");
+for(const k in ALLY)TYPES[k].far=400;
+FAC.fbi=FAC.tentara=FAC.elit=2;
+const enemyOf=o=>o.hp>0&&!o.ally&&!o.tied&&!o.loaded&&(o.cz||(FAC[o.type]!==undefined&&FAC[o.type]!==2)||(o.type==="polisi"&&X.wanted>0));
+function allyV3AI(m,dt,dist,dx,dz){
+  const pf=ALLY[m.type];m.cd=(m.cd||0)-dt;m.hp=Math.min(pf.hp,m.hp+dt*1.2);m.sp=pf.sp;
+  let tg=null,bd=pf.rng;
+  const am=V3.atkM;if(am&&V3.atkT>0&&enemyOf(am)&&Math.hypot(am.x-m.x,am.z-m.z)<pf.rng*1.4&&losM(m,am))tg=am;
+  if(!tg)for(const o of mobs()){if(!enemyOf(o))continue;const d=Math.hypot(o.x-m.x,o.z-m.z);if(d<bd&&Math.abs(o.y-m.y)<10&&losM(m,o)){bd=d;tg=o;}}
+  if(tg){
+    const d=Math.hypot(tg.x-m.x,tg.z-m.z);m.yaw=Math.atan2(-(tg.x-m.x),-(tg.z-m.z));
+    m.st=(m.st||0)-dt;if(m.st<=0){m.st=rnd(.6,1.3);m.sd=Math.random()<.5?1:-1;}
+    if(d<pf.keep-4){m.yaw+=Math.PI;m.moving=true;}else if(d>pf.keep+6)m.moving=true;else{m.yaw+=m.sd*1.3;m.moving=Math.random()<.92;}
+    if(m.cd<=0&&d<pf.rng){m.cd=pf.cd*rnd(.9,1.2);
+      const ex=tg.x-m.x,ey=tg.y+1-(m.y+1.2),ez=tg.z-m.z,L=Math.hypot(ex,ey,ez)||1;
+      addP(m.x+ex/L*.8,m.y+1.2,m.z+ez/L*.8,ex/L*70,ey/L*70,ez/L*70,.07,m.type==="elit"?[.5,.8,1]:[1,.85,.35],Math.min(.5,L/70),{g:0});
+      shotAt(m.type==="elit"?"smg":"pistol",m.x,m.z,1.1);
+      if(Math.random()<pf.acc)A.hurtMob(tg,pf.dmg,m.x,m.z,false);}
+    return true;}
+  if(dist>55){m.x=P.x+rnd(-3,3);m.z=P.z+rnd(-3,3);m.y=P.y+.5;m.vx=m.vz=m.vy=0;return true;}
+  if(dist>6){goToward(m,P.x,P.z);if(dist>18)m.sp=pf.sp*1.5;}
+  else{m.moving=false;if(Math.random()<dt*.4)m.yaw=Math.atan2(-dx,-dz)+rnd(-.6,.6);}
+  return true;
+}
+function spawnMobAt(type,x,z,y){
+  const gy=y!==undefined?y:A.groundY(Math.floor(x),Math.floor(z));if(gy<0)return null;
+  const m=A.makeMob(type,x,gy+.02,z);if(ALLY[type])m.ally=1;A.mobs().push(m);burst(x,gy+1,z,8,2,()=>[1,1,.6],.1,.6,{g:-1});return m;
+}
+function spawnEgg(h){
+  const e=EGGBY[h],o=A.eyePos(),d=lookDir();let x,y,z;
+  if(target){x=target.px+.5;y=target.py+.05;z=target.pz+.5;}else{x=o[0]+d[0]*3;z=o[2]+d[2]*3;y=A.groundY(Math.floor(x),Math.floor(z));if(y<0)y=P.y;}
+  const m=spawnMobAt(e.type,x,z,y);if(!m)return;
+  if(S.mode==="survival"){A.take(h,1);A.refreshHotbar();A.updateHUD(true);}
+  S.atkCd=.3;S.swing=.2;A.tone("sine",600,1000,.12,.25);chip("🥚 "+e.n+(ALLY[e.type]?" siap membantumu!":" muncul"));
+}
+function spawnAlly(type,n){for(let i=0;i<n;i++){const a=Math.random()*6.283,d=rnd(2.5,5);spawnMobAt(type,P.x+Math.cos(a)*d,P.z+Math.sin(a)*d);}chip("🤝 "+n+"× "+type.toUpperCase()+" bergabung");}
+function eggIcon(g,id){const e=EGGBY[id];if(!e)return false;const c=e.col;
+  for(let y=2;y<=14;y++)for(let x=3;x<=12;x++){const dx=(x-7.5)/4.6,dy=(y-8.5)/6.4;if(dx*dx+dy*dy<1)px(g,dx*dx+dy*dy>.72?shd(c,.55):css(c),x,y);}
+  px(g,"#fff",6,5,2,1);px(g,shd(c,1.5),5,9,2,1);px(g,shd(c,1.5),9,11,2,1);px(g,"#222",8,7,1,1);return true;}
+function iconV3b(g,id){
+  if(EGGBY[id])return eggIcon(g,id);
+  switch(id){
+    case 247:px(g,"#f3d24a",3,3,10,10);px(g,"#fff6c0",5,3,6,2);px(g,"#b8901a",2,3,2,5);px(g,"#b8901a",12,3,2,5);px(g,"#fff",7,5,2,7);px(g,"#fff",4,8,8,1);px(g,"#fff6c0",6,13,4,1);return true;
+    case 248:for(let y=2;y<=14;y++)for(let x=4;x<=12;x++){const d=Math.hypot((x-8)*.9,y-8.5);if(d<5.4)px(g,d>4?"#6a6a66":"#c8c8c0",x,y);}px(g,"#d33",4,6,9,1);px(g,"#d33",4,10,9,1);px(g,"#333",7,1,2,2);px(g,"#fc0",7,4,2,2);return true;
+    case 249:px(g,"#3b4a30",2,6,12,3);px(g,"#556a44",2,6,12,1);px(g,"#222",1,5,2,5);px(g,"#d63",14,6,1,3);px(g,"#2a2a2a",5,9,3,5);px(g,"#8a6",9,5,2,1);return true;
+    case 27:px(g,"#5a3a1c",6,8,4,7);px(g,"#3a2410",7,9,2,5);px(g,"#ff9a1a",5,3,6,6);px(g,"#ffe070",6,4,4,4);px(g,"#fff6c0",7,5,2,2);return true;
+  }
+  return false;
+}
+function descV3b(id){
+  if(EGGBY[id]){const e=EGGBY[id];return "Telur "+e.n+" · tekan Pasang untuk memunculkan"+(ALLY[e.type]?" · sekutu pintar, ikut menyerang musuh yang menyerangmu":"");}
+  return({247:"Armor Tuhan · kebal semua serangan (peluru, ledakan, jatuh) · Pasang untuk memakai",248:"Bom Hirosima · tekan Serang untuk melempar · kekuatan 1.000.000.000.000.000 · jauhi sejauh mungkin!",249:"Pistol Bazoka · peluru bazoka TAK TERBATAS · tembakan meledak dahsyat",27:"Obor · lampu terang, taruh di mana saja · pegang untuk menerangi sekitar"})[id]||null;
+}
+function rocketFire(g){
+  S.atkCd=g.cd;S.swing=.22;P.pitch=Math.min(1.5,P.pitch+.07);const o=A.eyePos(),d=lookDir();
+  shotSound("rail",1,0);A.tone("sawtooth",160,60,.35,.3);mflash();V3.loud=Math.max(V3.loud,2);
+  let x=o[0],y=o[1],z=o[2],ok=false;
+  for(let t=0;t<150&&!ok;t+=.6){x+=d[0]*.6;y+=d[1]*.6;z+=d[2]*.6;
+    if(solid(Math.floor(x),Math.floor(y),Math.floor(z))||y<1){ok=true;break;}
+    for(const q of mobs()){if(q.hp<=0)continue;const T=TYPES[q.type];if(Math.abs(q.x-x)<T.r+.5&&Math.abs(q.z-z)<T.r+.5&&y>q.y-.2&&y<q.y+T.h+.4){ok=true;break;}}}
+  for(let k=0;k<14;k++){const t=k/14,L=Math.hypot(x-o[0],y-o[1],z-o[2]);addP(o[0]+(x-o[0])*t+d[0]*.8,o[1]+(y-o[1])*t-.15,o[2]+(z-o[2])*t+d[2]*.8,0,0,0,.14,[1,.6,.15],.35,{g:0,fade:.3});}
+  explode(x-d[0]*.4,y-d[1]*.4,z-d[2]*.4,5.4,100,4,{byP:true});
+}
+function hiro(x,y,z){
+  V3.loud=6;flashWhite(1);A.tone("sawtooth",50,18,3.4,.6);
+  explode(x,y,z,30,3000,24,{byP:true});explode(x,y,z,50,900,6,{byP:true,quiet:true});
+  V3.nukes.push({x,y,z,t:0,s:0,k:2.4});if(inCity(x,z))wanted(5,"Bom Hirosima!");
+}
+/* ---- lampu / obor ---- */
+const LAMPS=[];let LA=new Float32Array(32),laT=0,lampScan=false;
+function scanLamps(){LAMPS.length=0;let i=blocks.indexOf(27);while(i>=0){LAMPS.push(i%W,(i/(W*D))|0,((i/W)|0)%D);i=blocks.indexOf(27,i+1);}}
+function onBlk(old,nw,x,y,z){
+  if(nw===27){LAMPS.push(x,y,z);}
+  else if(old===27){for(let i=0;i<LAMPS.length;i+=3)if(LAMPS[i]===x&&LAMPS[i+1]===y&&LAMPS[i+2]===z){LAMPS.splice(i,3);break;}}
+}
+function lightTick(dt){
+  laT-=dt;if(laT>0)return;laT=.15;if(!lampScan){lampScan=true;scanLamps();}
+  const best=[];
+  for(let i=0;i<LAMPS.length;i+=3){const dx=LAMPS[i]-P.x,dy=LAMPS[i+1]-P.y,dz=LAMPS[i+2]-P.z,d=dx*dx+dy*dy+dz*dz;if(d>2500)continue;
+    if(best.length<8||d<best[best.length-1][3]){best.push([LAMPS[i]+.5,LAMPS[i+1]+.5,LAMPS[i+2]+.5,d]);best.sort((a,b)=>a[3]-b[3]);if(best.length>8)best.pop();}}
+  if(A.held()===27){best.unshift([P.x,P.y+1.2,P.z,0]);if(best.length>8)best.pop();}
+  LA.fill(0);best.forEach((b,i)=>{LA[i*4]=b[0];LA[i*4+1]=b[1];LA[i*4+2]=b[2];LA[i*4+3]=18;});
+}
+const lightArr=()=>LA;const cityOn=()=>inCity(P.x,P.z);
+function cityLamps(){const h0=CITY.h0;for(let x=CITY.x0+2;x<CITY.x1-2;x++)for(let z=CITY.z0+2;z<CITY.z1-2;z++){if((x+z)%10)continue;
+  if(get(x,h0-1,z)!==25||get(x,h0,z)!==0)continue;
+  if(get(x+1,h0-1,z)!==22&&get(x-1,h0-1,z)!==22&&get(x,h0-1,z+1)!==22&&get(x,h0-1,z-1)!==22)continue;
+  for(let y=0;y<4;y++)blocks[idx(x,h0+y,z)]=3;blocks[idx(x,h0+4,z)]=27;}}
+/* ---- panel Mod ---- */
+function modPanel(){
+  const b=panels.modp.body;b.innerHTML="";
+  const sec=t=>el("div",{class:"qrow",text:t},b),grid=()=>el("div",{style:"display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px"},b);
+  const btn=(t,fn,p)=>{const x=el("button",{text:t,style:"padding:12px 6px;font-size:14px"},p||b);x.addEventListener("click",()=>{SFX.click();fn();});return x;};
+  sec("🤝 Sekutu pintar · ikut menyerang musuh yang menyerangmu");let g=grid();
+  btn("🕴 FBI ×1",()=>spawnAlly("fbi",1),g);btn("🕴 FBI ×5",()=>spawnAlly("fbi",5),g);
+  btn("🪖 Tentara ×1",()=>spawnAlly("tentara",1),g);btn("🪖 Tentara ×5",()=>spawnAlly("tentara",5),g);
+  btn("🥷 Elit ×1",()=>spawnAlly("elit",1),g);btn("🥷 Elit ×5",()=>spawnAlly("elit",5),g);
+  btn("🗑 Hapus semua sekutu",()=>{const L=mobs();for(let i=L.length-1;i>=0;i--)if(L[i].ally)L.splice(i,1);chip("Sekutu dihapus");},b).style.width="100%";
+  sec("🥚 Telur spawn (juga ada di Inventori > Telur)");
+  btn("Ambil semua telur ×16",()=>{for(const e of EGGS)A.give(e[0],16,true);A.refreshHotbar();chip("🥚 Semua telur masuk tas");},b).style.width="100%";g=grid();
+  for(const e of EGGS)btn("🥚 "+e[2],()=>{const a=Math.random()*6.283,d=rnd(3,5);spawnMobAt(e[1],P.x+Math.cos(a)*d,P.z+Math.sin(a)*d);},g);
+  sec("⚙ Alat");g=grid();
+  btn("⭐ Hapus bintang",()=>{X.wanted=0;A.updateHUD(true);chip("Bintang buronan dihapus");},g);
+  btn("❤ Isi darah",()=>{S.hp=20;S.food=20;A.updateHUD(true);},g);
+  btn("🔦 Ambil 64 Obor",()=>{A.give(27,64,true);A.refreshHotbar();chip("+64 Obor");},g);
+  btn("🔫 Peluru ×500",()=>{for(const i of[130,137,138,139])A.give(i,500,true);A.refreshHotbar();chip("+500 semua peluru");},g);
+  btn("🛡 Armor Tuhan",()=>{A.give(247,1,true);A.refreshHotbar();chip("+Armor Tuhan");},g);
+  btn("☢ Bom Hirosima",()=>{A.give(248,1,true);A.refreshHotbar();chip("+Bom Hirosima");},g);
+}
+
 function init(){initUI();}
 const crCount=id=>GR[id]?(X.cr[id]||64):0;
 const wornId=()=>X.worn|0;
-return{worn:wornId,crCount,ai,preHurt,blood,kill,use,attack,weapon,driving,update,hudKey,gunInfo,infoExtra,save,load,newWorld,populate,init,tiles,icon,describe,onGive,drawChar,hotExtra,drawPlayer,emit,emitSky,gen,noSave:()=>MP.noSave,
+return{onBlk,lightArr,cityOn,worn:wornId,crCount,ai,preHurt,blood,kill,use,attack,weapon,driving,update,hudKey,gunInfo,infoExtra,save,load,newWorld,populate,init,tiles,icon,describe,onGive,drawChar,hotExtra,drawPlayer,emit,emitSky,gen,noSave:()=>MP.noSave,
   chaos:chaosOn,zcap,dbg:{V3,get CITY(){return CITY},wanted,cutMob,tieMob,nuke,dropHeld,dropItem,wearToggle,openVault,robTeller,vFire,wantedTick,V,startDrink,startEmote,openHostScreen,get BARS(){return BARS},startChaos,ZT,get WR(){return WR},get ZS(){return ZS},zAI,MP,onMsg,mpHost,mpJoin,mpStart,mpRay,hitPlayer,aggro,renderLook,applyPreset,PRESETS,openChest:openChest,W:()=>X.w,X,DV,SHOPS,get BASE(){return BASE;},LOOT,SHELF,GUN,GR,fire,throwG,explode,spawnVeh,mount,dismount,openChest,takeShelf,openShop,feed,fishUse,catchFish,ignite,ptc,grens,VEH,renderShop}};
 })();
